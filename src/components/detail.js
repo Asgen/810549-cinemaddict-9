@@ -1,6 +1,24 @@
-const getDetailTamplate = ({title, description, director, writers, actors, duration, country, poster, date, genre, rate, age, comments}) => {
-  return `
-  <section class="film-details">
+import AbstractComponent from '../components/AbstractComponent.js';
+
+export default class ShowMoreBtn extends AbstractComponent {
+  constructor({title, description, director, writers, actors, duration, country, poster, date, genre, rate, age, comments}) {
+    super();
+    this._title = title;
+    this._description = description;
+    this._director = director;
+    this._writers = writers;
+    this._actors = actors;
+    this._duration = duration;
+    this._country = country;
+    this._poster = poster;
+    this._date = date;
+    this._genre = genre;
+    this._rate = rate;
+    this._age = age;
+    this._comments = comments;
+  }
+  getTemplate() {
+    return `<section class="film-details">
   <form class="film-details__inner" action="" method="get">
     <div class="form-details__top-container">
       <div class="film-details__close">
@@ -8,59 +26,59 @@ const getDetailTamplate = ({title, description, director, writers, actors, durat
       </div>
       <div class="film-details__info-wrap">
         <div class="film-details__poster">
-          <img class="film-details__poster-img" src="${poster}" alt="">
+          <img class="film-details__poster-img" src="${this._poster}" alt="">
 
-          <p class="film-details__age">${age}+</p>
+          <p class="film-details__age">${this._age}+</p>
         </div>
 
         <div class="film-details__info">
           <div class="film-details__info-head">
             <div class="film-details__title-wrap">
-              <h3 class="film-details__title">${title}</h3>
-              <p class="film-details__title-original">${title}</p>
+              <h3 class="film-details__title">${this._title}</h3>
+              <p class="film-details__title-original">${this._title}</p>
             </div>
 
             <div class="film-details__rating">
-              <p class="film-details__total-rating">${rate}</p>
+              <p class="film-details__total-rating">${this._rate}</p>
             </div>
           </div>
 
           <table class="film-details__table">
             <tr class="film-details__row">
               <td class="film-details__term">Director</td>
-              <td class="film-details__cell">${director}</td>
+              <td class="film-details__cell">${this._director}</td>
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Writers</td>
-              <td class="film-details__cell">${Array.from(writers).join(`, `)}</td>
+              <td class="film-details__cell">${Array.from(this._writers).join(`, `)}</td>
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Actors</td>
-              <td class="film-details__cell">${Array.from(actors).join(`, `)}</td>
+              <td class="film-details__cell">${Array.from(this._actors).join(`, `)}</td>
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Release Date</td>
-              <td class="film-details__cell">${date}</td>
+              <td class="film-details__cell">${this._date}</td>
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Runtime</td>
-              <td class="film-details__cell">${duration}</td>
+              <td class="film-details__cell">${this._duration}</td>
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Country</td>
-              <td class="film-details__cell">${country}</td>
+              <td class="film-details__cell">${this._country}</td>
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Genres</td>
               <td class="film-details__cell">
-                ${Array.from(genre)
+                ${Array.from(this._genre)
                   .map((it) => `<span class="film-details__genre">${it}</span>`)
                   .join(``)}
             </tr>
           </table>
 
           <p class="film-details__film-description">
-            ${description}
+            ${this._description}
           </p>
         </div>
       </div>
@@ -79,10 +97,10 @@ const getDetailTamplate = ({title, description, director, writers, actors, durat
 
     <div class="form-details__bottom-container">
       <section class="film-details__comments-wrap">
-        <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${comments.length}</span></h3>
+        <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${this._comments.length}</span></h3>
 
         <ul class="film-details__comments-list">
-          ${comments.map((it) => `<li class="film-details__comment">
+          ${this._comments.map((it) => `<li class="film-details__comment">
             <span class="film-details__comment-emoji">
               <img src="./images/emoji/${it.reaction}.png" width="55" height="55" alt="emoji">
             </span>
@@ -90,7 +108,7 @@ const getDetailTamplate = ({title, description, director, writers, actors, durat
               <p class="film-details__comment-text">${it.comment}</p>
               <p class="film-details__comment-info">
                 <span class="film-details__comment-author">${it.commentator}</span>
-                <span class="film-details__comment-day">${new Date(date).toDateString()}</span>
+                <span class="film-details__comment-day">${new Date(this._date).toDateString()}</span>
                 <button class="film-details__comment-delete">Delete</button>
               </p>
             </div>
@@ -130,6 +148,5 @@ const getDetailTamplate = ({title, description, director, writers, actors, durat
     </div>
   </form>
 </section>`;
-};
-
-export {getDetailTamplate as detail};
+  }
+}
