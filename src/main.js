@@ -1,4 +1,4 @@
-import {cardsList as cards, makeCard, user} from '../src/data.js';
+import {cardsList as cards, user} from '../src/data.js';
 import {render, Position} from '../src/utils.js';
 
 import Search from '../src/components/search.js';
@@ -13,7 +13,40 @@ import Detail from '../src/components/detail.js';
 const cardsList = cards.slice();
 
 const renderCard = (cardMock) => {
+
+  const onCardClick = (card) => {
+
+    const onEscKeyDown = (evt) => {
+      if (evt.key === `Escape` || evt.key === `Esc`) {
+        body.removeChild(detail.getElement());
+      }
+    };
+
+    const detail = new Detail(card);
+
+    detail.getElement()
+      .querySelector(`.film-details__close-btn`)
+      .addEventListener(`click`, () => {
+        body.removeChild(detail.getElement());
+      });
+
+    detail.getElement()
+      .querySelector(`textarea`)
+      .addEventListener(`focus`, () => {
+        document.removeEventListener(`keydown`, onEscKeyDown);
+      });
+
+    document.addEventListener(`keydown`, onEscKeyDown);
+
+    render(body, detail.getElement(), Position.BEFOREEND);
+  };
+
   const card = new Card(cardMock);
+
+  card.getElement().querySelector(`.film-card__title`).addEventListener(`click`, () => onCardClick(cardMock));
+  card.getElement().querySelector(`.film-card__comments`).addEventListener(`click`, () => onCardClick(cardMock));
+  card.getElement().querySelector(`.film-card__poster`).addEventListener(`click`, () => onCardClick(cardMock));
+
   render(container, card.getElement(), Position.BEFOREEND);
 };
 
@@ -32,9 +65,17 @@ render(main, new FilmsContainer().getElement(), Position.BEFOREEND);
 
 const filmsList = main.querySelector(`.films-list`);
 const container = filmsList.querySelector(`.films-list__container`);
-renderCards(cardsList);
-render(filmsList, new ShowMoreBtn().getElement(), Position.BEFOREEND);
-render(body, new Detail(makeCard()).getElement(), Position.BEFOREEND);
+
+if (cards.length < 1) {
+  container.innerText = `There are no movies in our database`;
+} else {
+  renderCards(cardsList);
+}
+
+
+if (cardsList.length > 5) {
+  render(filmsList, new ShowMoreBtn().getElement(), Position.BEFOREEND);
+}
 
 const loadMore = filmsList.querySelector(`.films-list__show-more`);
 loadMore.addEventListener(`click`, () => {
@@ -44,10 +85,4 @@ loadMore.addEventListener(`click`, () => {
   if (cardsList.length < 1) {
     loadMore.style.display = `none`;
   }
-});
-
-const detailView = document.querySelector(`.film-details`);
-const closeDetailButton = detailView.querySelector(`.film-details__close-btn`);
-closeDetailButton.addEventListener(`click`, () => {
-  detailView.style.display = `none`;
 });
