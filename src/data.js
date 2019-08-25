@@ -1,4 +1,4 @@
-const CARDS_AMOUNT = 0;
+const CARDS_AMOUNT = 12;
 
 const makeComment = () => ({
   commentator: `John Doe`,
