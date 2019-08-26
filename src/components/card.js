@@ -18,7 +18,7 @@ class Card extends AbstractComponent {
     <h3 class="film-card__title">${this._title}</h3>
     <p class="film-card__rating">${this._rate}</p>
     <p class="film-card__info">
-      <span class="film-card__year">${this._date}</span>
+      <span class="film-card__year">${new Date(this._date).toDateString()}</span>
       <span class="film-card__duration">${this._duration}</span>
       <span class="film-card__genre">${Array.from(this._genre).join(`, `)}</span>
     </p>

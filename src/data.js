@@ -63,11 +63,7 @@ const makeCard = () => ({
     `Bridget Fonda`,
     `Margot Robbie`
   ]),
-  date: [
-    `13 March 2019`,
-    `1 April 2005`,
-    `7 August 2019`
-  ][Math.floor(Math.random() * 3)],
+  date: Date.now() + 1 + Math.floor((Math.random() * 15000) - 14999) * 24 * 60 * 60 * 1000,
   duration: [
     `1h 15m`,
     `1h 20m`,
