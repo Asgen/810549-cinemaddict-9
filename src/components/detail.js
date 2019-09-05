@@ -1,3 +1,4 @@
+import moment from 'moment';
 import {render, createElement, Position} from '../utils.js';
 import AbstractComponent from '../components/AbstractComponent.js';
 
@@ -102,7 +103,7 @@ export default class ShowMoreBtn extends AbstractComponent {
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Release Date</td>
-              <td class="film-details__cell">${this._date}</td>
+              <td class="film-details__cell">${moment(this._date).format(`DD MMMM YYYY`)}</td>
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Runtime</td>
