@@ -1,7 +1,8 @@
+import {render, createElement, Position} from '../utils.js';
 import AbstractComponent from '../components/AbstractComponent.js';
 
 export default class ShowMoreBtn extends AbstractComponent {
-  constructor({title, description, director, writers, actors, duration, country, poster, date, genre, rate, age, comments}) {
+  constructor({title, description, director, writers, actors, duration, country, poster, date, genre, rate, age, comments, isWatched, inWatchList, isFavorite}) {
     super();
     this._title = title;
     this._description = description;
@@ -16,7 +17,50 @@ export default class ShowMoreBtn extends AbstractComponent {
     this._rate = rate;
     this._age = age;
     this._comments = comments;
+    this._isWatched = isWatched;
+    this._inWatchList = inWatchList;
+    this._isFavorite = isFavorite;
+
+    this._onControlClick();
+    this._onEmojiClick();
   }
+
+  _onEmojiClick() {
+    const emojiContainer = this.getElement().querySelector(`.film-details__add-emoji-label`);
+    const emojiList = this.getElement().querySelectorAll(`.film-details__emoji-item`);
+
+    for (let emoji of emojiList) {
+      emoji.addEventListener(`change`, (evt) => {
+        emojiContainer.innerHTML = ``;
+
+        switch (evt.target.value) {
+          case (`smile`):
+            render(emojiContainer, createElement(`<img src="images/emoji/smile.png" width="55" height="55" alt="emoji">`), Position.BEFOREEND);
+            break;
+          case (`sleeping`):
+            render(emojiContainer, createElement(`<img src="images/emoji/sleeping.png" width="55" height="55" alt="emoji">`), Position.BEFOREEND);
+            break;
+          case (`puke`):
+            render(emojiContainer, createElement(`<img src="images/emoji/puke.png" width="55" height="55" alt="emoji">`), Position.BEFOREEND);
+            break;
+          case (`angry`):
+            render(emojiContainer, createElement(`<img src="images/emoji/angry.png" width="55" height="55" alt="emoji">`), Position.BEFOREEND);
+            break;
+        }
+      });
+    }
+  }
+
+  _onControlClick() {
+    this.getElement().querySelector(`#watched`).addEventListener(`change`, (evt) => {
+      evt.preventDefault();
+
+      if (evt.target.id === `watched`) {
+        this.getElement().querySelector(`.form-details__middle-container`).classList.toggle(`visually-hidden`);
+      }
+    });
+  }
+
   getTemplate() {
     return `<section class="film-details">
   <form class="film-details__inner" action="" method="get">
@@ -84,14 +128,64 @@ export default class ShowMoreBtn extends AbstractComponent {
       </div>
 
       <section class="film-details__controls">
-        <input type="checkbox" class="film-details__control-input visually-hidden" id="watchlist" name="watchlist">
+        <input type="checkbox" class="film-details__control-input visually-hidden" id="watchlist" name="watchlist" ${this._inWatchList ? `checked` : ``}>
         <label for="watchlist" class="film-details__control-label film-details__control-label--watchlist">Add to watchlist</label>
 
-        <input type="checkbox" class="film-details__control-input visually-hidden" id="watched" name="watched">
+        <input type="checkbox" class="film-details__control-input visually-hidden" id="watched" name="watched" ${this._isWatched ? `checked` : ``}>
         <label for="watched" class="film-details__control-label film-details__control-label--watched">Already watched</label>
 
-        <input type="checkbox" class="film-details__control-input visually-hidden" id="favorite" name="favorite">
+        <input type="checkbox" class="film-details__control-input visually-hidden" id="favorite" name="favorite" ${this._isFavorite ? `checked` : ``}>
         <label for="favorite" class="film-details__control-label film-details__control-label--favorite">Add to favorites</label>
+      </section>
+    </div>
+    
+    <div class="form-details__middle-container ${this._isWatched ? `` : `visually-hidden`}">
+      <section class="film-details__user-rating-wrap">
+        <div class="film-details__user-rating-controls">
+          <button class="film-details__watched-reset" type="button">Undo</button>
+        </div>
+
+        <div class="film-details__user-score">
+          <div class="film-details__user-rating-poster">
+            <img src="${this._poster}" alt="film-poster" class="film-details__user-rating-img">
+          </div>
+
+          <section class="film-details__user-rating-inner">
+            <h3 class="film-details__user-rating-title">${this._title}</h3>
+
+            <p class="film-details__user-rating-feelings">How you feel it?</p>
+
+            <div class="film-details__user-rating-score">
+              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="1" id="rating-1">
+              <label class="film-details__user-rating-label" for="rating-1">1</label>
+
+              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="2" id="rating-2">
+              <label class="film-details__user-rating-label" for="rating-2">2</label>
+
+              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="3" id="rating-3">
+              <label class="film-details__user-rating-label" for="rating-3">3</label>
+
+              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="4" id="rating-4">
+              <label class="film-details__user-rating-label" for="rating-4">4</label>
+
+              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="5" id="rating-5">
+              <label class="film-details__user-rating-label" for="rating-5">5</label>
+
+              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="6" id="rating-6">
+              <label class="film-details__user-rating-label" for="rating-6">6</label>
+
+              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="7" id="rating-7">
+              <label class="film-details__user-rating-label" for="rating-7">7</label>
+
+              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="8" id="rating-8">
+              <label class="film-details__user-rating-label" for="rating-8">8</label>
+
+              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="9" id="rating-9" checked="">
+              <label class="film-details__user-rating-label" for="rating-9">9</label>
+
+            </div>
+          </section>
+        </div>
       </section>
     </div>
 
@@ -123,22 +217,22 @@ export default class ShowMoreBtn extends AbstractComponent {
           </label>
 
           <div class="film-details__emoji-list">
-            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-smile" value="sleeping">
+            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-smile" value="smile">
             <label class="film-details__emoji-label" for="emoji-smile">
               <img src="./images/emoji/smile.png" width="30" height="30" alt="emoji">
             </label>
 
-            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-sleeping" value="neutral-face">
+            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-sleeping" value="sleeping">
             <label class="film-details__emoji-label" for="emoji-sleeping">
               <img src="./images/emoji/sleeping.png" width="30" height="30" alt="emoji">
             </label>
 
-            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-gpuke" value="grinning">
+            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-gpuke" value="puke">
             <label class="film-details__emoji-label" for="emoji-gpuke">
               <img src="./images/emoji/puke.png" width="30" height="30" alt="emoji">
             </label>
 
-            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-angry" value="grinning">
+            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-angry" value="angry">
             <label class="film-details__emoji-label" for="emoji-angry">
               <img src="./images/emoji/angry.png" width="30" height="30" alt="emoji">
             </label>

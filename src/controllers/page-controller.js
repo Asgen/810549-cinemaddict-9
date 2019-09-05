@@ -1,19 +1,29 @@
 import {render, unrender, Position} from '../utils.js';
 
-import Card from '../components/card.js';
-import Detail from '../components/detail.js';
+import Navigation from '../components/navigation.js';
 import ShowMoreBtn from '../components/show-more-button.js';
 import Sort from '../components/sort.js';
+import Films from '../components/films.js';
+import FilmsList from '../components/films-list.js';
 import FilmsContainer from '../components/films-container.js';
+import MovieController from '../controllers/movie-controller.js';
 
 
 export default class PageController {
-  constructor(cardsArr) {
+  constructor(cardsArr, user) {
     this._cardsArr = cardsArr;
+    this._user = user;
+    this._navigation = new Navigation(user);
     this._showMoreBtn = new ShowMoreBtn();
+    this._films = new Films();
+    this._filmsList = new FilmsList();
     this._container = new FilmsContainer();
     this._sort = new Sort();
     this._unrenderedCards = 0;
+
+    this._subscriptions = [];
+    this._onDataChange = this._onDataChange.bind(this);
+    this._onChangeView = this._onChangeView.bind(this);
   }
 
   init() {
@@ -21,8 +31,11 @@ export default class PageController {
 
     const body = document.querySelector(`body`);
     const main = document.querySelector(`.main`);
+    render(main, this._navigation.getElement(), Position.BEFOREEND);
     render(main, this._sort.getElement(), Position.BEFOREEND);
-    render(main, this._container.getElement(), Position.BEFOREEND);
+    render(main, this._films.getElement(), Position.BEFOREEND);
+    render(this._films.getElement(), this._filmsList.getElement(), Position.BEFOREEND);
+    render(this._filmsList.getElement(), this._container.getElement(), Position.BEFOREEND);
 
     this._sort.getElement().addEventListener(`click`, (e) => this._onSortClick(e));
 
@@ -30,72 +43,27 @@ export default class PageController {
       body.innerText = `There are no movies in our database`;
     } else {
       this._renderCards(cardsList);
+      this._unrenderedCards = cardsList;
     }
-
-    if (cardsList.length > 0) {
-      this._renderLoadMoreBtn(this._unrenderedCards);
-    }
-
-    this._unrenderedCards = cardsList;
-
     this._showMoreBtn.getElement().addEventListener(`click`, () => {
       if (this._unrenderedCards.length > 0) {
         this._renderCards(this._unrenderedCards);
       }
       if (this._unrenderedCards.length < 1) {
-        unrender(this._showMoreBtn);
+        unrender(this._showMoreBtn.getElement());
       }
     });
   }
 
   _renderCards(cardsArr) {
-    const renderCard = (data) => {
-      const body = document.querySelector(`body`);
-      const container = document.querySelector(`.films-list__container`);
-      const onCardClick = (card) => {
+    cardsArr.splice(0, 5).forEach((cardMock) => {
+      const movieController = new MovieController(this._container, cardMock, this._onDataChange, this._onChangeView);
+      this._subscriptions.push(movieController.setDefaultView.bind(movieController));
+    });
+    this._unrenderedCards = cardsArr;
 
-        const onEscKeyDown = (evt) => {
-          if (evt.key === `Escape` || evt.key === `Esc`) {
-            body.removeChild(detail.getElement());
-          }
-          document.removeEventListener(`keydown`, onEscKeyDown);
-        };
-
-        const detail = new Detail(card);
-
-        detail.getElement()
-          .querySelector(`.film-details__close-btn`)
-          .addEventListener(`click`, () => {
-            body.removeChild(detail.getElement());
-          });
-
-        detail.getElement()
-          .querySelector(`textarea`)
-          .addEventListener(`focus`, () => {
-            document.removeEventListener(`keydown`, onEscKeyDown);
-          });
-
-        document.addEventListener(`keydown`, onEscKeyDown);
-
-        render(body, detail.getElement(), Position.BEFOREEND);
-      };
-
-      const card = new Card(data);
-
-      card.getElement().querySelector(`.film-card__title`).addEventListener(`click`, () => onCardClick(data));
-      card.getElement().querySelector(`.film-card__comments`).addEventListener(`click`, () => onCardClick(data));
-      card.getElement().querySelector(`.film-card__poster`).addEventListener(`click`, () => onCardClick(data));
-
-      render(container, card.getElement(), Position.BEFOREEND);
-    };
-
-    cardsArr.splice(0, 5).forEach((cardMock) => renderCard(cardMock));
-  }
-
-  _renderLoadMoreBtn(cardsList) {
-    const filmsList = document.querySelector(`.films-list`);
-    if (cardsList.length > 0) {
-      render(filmsList, this._showMoreBtn.getElement(), Position.BEFOREEND);
+    if (cardsArr.length > 0) {
+      render(this._filmsList.getElement(), this._showMoreBtn.getElement(), Position.BEFOREEND);
     }
   }
 
@@ -106,31 +74,56 @@ export default class PageController {
       return;
     }
 
-    const container = document.querySelector(`.films-list__container`);
     document.querySelector(`.sort__button--active`).classList.remove(`sort__button--active`);
     evt.target.classList.add(`sort__button--active`);
-    container.innerHTML = ``;
+    this._container.getElement().innerHTML = ``;
 
     switch (evt.target.dataset.sortType) {
       case `date`:
         const sortByDate = this._cardsArr.slice().sort((a, b) => a.date - b.date);
         this._renderCards(sortByDate);
-        this._unrenderedCards = sortByDate;
-        this._renderLoadMoreBtn(sortByDate);
         break;
       case `rating`:
         const sortByRating = this._cardsArr.slice().sort((a, b) => a.rate - b.rate);
         this._renderCards(sortByRating);
-        this._unrenderedCards = sortByRating;
-        this._renderLoadMoreBtn(sortByRating);
         break;
       case `default`:
         const sortByDefault = this._cardsArr.slice();
         this._renderCards(sortByDefault);
-        this._unrenderedCards = sortByDefault;
-        this._renderLoadMoreBtn(sortByDefault);
+        break;
+    }
+  }
+
+  _onDataChange(oldData, control) {
+    const thisCard = this._cardsArr[this._cardsArr.findIndex((it) => it === oldData)];
+
+    switch (control) {
+
+      case (`watchlist`):
+        thisCard.inWatchList = thisCard.inWatchList !== true ? true : false;
+        break;
+      case (`watched`):
+        thisCard.isWatched = thisCard.isWatched !== true ? true : false;
+        break;
+      case (`favorite`):
+        thisCard.isFavorite = thisCard.isFavorite !== true ? true : false;
         break;
     }
 
+    unrender(this._container.getElement());
+    this._container.removeElement();
+    unrender(this._navigation.getElement());
+    this._navigation.removeElement();
+
+    const main = document.querySelector(`.main`);
+    render(main, this._navigation.getElement(), Position.AFTERBEGIN);
+    render(this._filmsList. getElement(), this._container.getElement(), Position.BEFOREEND);
+    const cardsList = this._cardsArr.slice();
+    this._renderCards(cardsList);
+    this._unrenderedCards = cardsList;
+  }
+
+  _onChangeView() {
+    this._subscriptions.forEach((subscription) => subscription());
   }
 }
