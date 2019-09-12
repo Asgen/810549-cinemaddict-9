@@ -65,9 +65,9 @@ const makeCard = () => ({
   ]),
   date: Date.now() + 1 + Math.floor((Math.random() * 15000) - 14999) * 24 * 60 * 60 * 1000,
   duration: [
-    `1h 15m`,
-    `1h 20m`,
-    `2h 07m`
+    77,
+    80,
+    110
   ][Math.floor(Math.random() * 3)],
   country: `USA`,
   genre: new Set([

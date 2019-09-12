@@ -1,6 +1,5 @@
 import {render, unrender, Position} from '../utils.js';
 
-import Navigation from '../components/navigation.js';
 import ShowMoreBtn from '../components/show-more-button.js';
 import Sort from '../components/sort.js';
 import Films from '../components/films.js';
@@ -10,10 +9,8 @@ import MovieController from '../controllers/movie-controller.js';
 
 
 export default class PageController {
-  constructor(cardsArr, user) {
+  constructor(cardsArr) {
     this._cardsArr = cardsArr;
-    this._user = user;
-    this._navigation = new Navigation(user);
     this._showMoreBtn = new ShowMoreBtn();
     this._films = new Films();
     this._filmsList = new FilmsList();
@@ -31,7 +28,6 @@ export default class PageController {
 
     const body = document.querySelector(`body`);
     const main = document.querySelector(`.main`);
-    render(main, this._navigation.getElement(), Position.BEFOREEND);
     render(main, this._sort.getElement(), Position.BEFOREEND);
     render(main, this._films.getElement(), Position.BEFOREEND);
     render(this._films.getElement(), this._filmsList.getElement(), Position.BEFOREEND);
@@ -112,11 +108,7 @@ export default class PageController {
 
     unrender(this._container.getElement());
     this._container.removeElement();
-    unrender(this._navigation.getElement());
-    this._navigation.removeElement();
 
-    const main = document.querySelector(`.main`);
-    render(main, this._navigation.getElement(), Position.AFTERBEGIN);
     render(this._filmsList. getElement(), this._container.getElement(), Position.BEFOREEND);
     const cardsList = this._cardsArr.slice();
     this._renderCards(cardsList);
