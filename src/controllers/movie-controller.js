@@ -82,6 +82,16 @@ export default class MovieController {
       });
     }
 
+    this._detail.getElement().querySelector(`.film-details__comments-wrap`)
+      .addEventListener(`click`, (evt) => {
+
+        if (evt.target.tagName !== `BUTTON`) {
+          return;
+        }
+
+        this._onDataChange(this._data, null);
+      });
+
     this._card.getElement().querySelector(`.film-card__title`).addEventListener(`click`, () => onCardClick(this._data));
     this._card.getElement().querySelector(`.film-card__comments`).addEventListener(`click`, () => onCardClick(this._data));
     this._card.getElement().querySelector(`.film-card__poster`).addEventListener(`click`, () => onCardClick(this._data));

@@ -1,9 +1,9 @@
 import AbstractComponent from '../components/AbstractComponent.js';
 
 export default class StatisticRank extends AbstractComponent {
-  constructor({rank}) {
+  constructor({rating}) {
     super();
-    this._rank = rank;
+    this._rank = rating;
   }
   getTemplate() {
     return `<p class="statistic__rank">

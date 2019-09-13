@@ -93,7 +93,6 @@ const makeCard = () => ({
 const cardsList = Array.from(Array(CARDS_AMOUNT))
   .map(makeCard);
 
-
 const user = {
   rating: [
     `Novice`,
@@ -101,8 +100,27 @@ const user = {
     `Movie Buff`
   ][Math.floor(Math.random() * 3)],
   watchlist: cardsList.filter((card) => card.inWatchList).length,
-  history: cardsList.filter((card) => card.isWatched).length,
-  favorites: cardsList.filter((card) => card.isFavorite).length,
+  history: cardsList.filter((card) => card.isWatched),
+  favorites: cardsList.filter((card) => card.isFavorite),
 };
+
+const allGenres = user.favorites
+  .reduce((prev, curr) => {
+    return [...prev, ...curr.genre];
+  }, [])
+  .reduce((acc, el) => {
+    acc[el] = (acc[el] || 0) + 1;
+    return acc;
+  }, {});
+
+let bestGanre = 0;
+
+for (let key in allGenres) {
+  if (allGenres[key] > bestGanre) {
+    bestGanre = key;
+  }
+}
+
+user.topGenre = bestGanre;
 
 export {cardsList, makeCard, user};

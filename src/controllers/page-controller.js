@@ -2,19 +2,18 @@ import {render, unrender, Position} from '../utils.js';
 
 import ShowMoreBtn from '../components/show-more-button.js';
 import Sort from '../components/sort.js';
-import Films from '../components/films.js';
 import FilmsList from '../components/films-list.js';
 import FilmsContainer from '../components/films-container.js';
 import MovieController from '../controllers/movie-controller.js';
 
 
 export default class PageController {
-  constructor(cardsArr) {
+  constructor(cardsArr, container) {
     this._cardsArr = cardsArr;
+    this._container = container;
     this._showMoreBtn = new ShowMoreBtn();
-    this._films = new Films();
     this._filmsList = new FilmsList();
-    this._container = new FilmsContainer();
+    this._filmsListContainer = new FilmsContainer();
     this._sort = new Sort();
     this._unrenderedCards = 0;
 
@@ -29,9 +28,9 @@ export default class PageController {
     const body = document.querySelector(`body`);
     const main = document.querySelector(`.main`);
     render(main, this._sort.getElement(), Position.BEFOREEND);
-    render(main, this._films.getElement(), Position.BEFOREEND);
-    render(this._films.getElement(), this._filmsList.getElement(), Position.BEFOREEND);
-    render(this._filmsList.getElement(), this._container.getElement(), Position.BEFOREEND);
+    render(main, this._container, Position.BEFOREEND);
+    render(this._container, this._filmsList.getElement(), Position.BEFOREEND);
+    render(this._filmsList.getElement(), this._filmsListContainer.getElement(), Position.BEFOREEND);
 
     this._sort.getElement().addEventListener(`click`, (e) => this._onSortClick(e));
 
@@ -51,9 +50,17 @@ export default class PageController {
     });
   }
 
+  show() {
+    this._container.classList.remove(`visually-hidden`);
+  }
+
+  hide() {
+    this._container.classList.add(`visually-hidden`);
+  }
+
   _renderCards(cardsArr) {
     cardsArr.splice(0, 5).forEach((cardMock) => {
-      const movieController = new MovieController(this._container, cardMock, this._onDataChange, this._onChangeView);
+      const movieController = new MovieController(this._filmsListContainer, cardMock, this._onDataChange, this._onChangeView);
       this._subscriptions.push(movieController.setDefaultView.bind(movieController));
     });
     this._unrenderedCards = cardsArr;
@@ -72,7 +79,7 @@ export default class PageController {
 
     document.querySelector(`.sort__button--active`).classList.remove(`sort__button--active`);
     evt.target.classList.add(`sort__button--active`);
-    this._container.getElement().innerHTML = ``;
+    this._filmsListContainer.getElement().innerHTML = ``;
 
     switch (evt.target.dataset.sortType) {
       case `date`:
@@ -90,10 +97,15 @@ export default class PageController {
     }
   }
 
-  _onDataChange(oldData, control) {
+  _onDataChange(oldData, newData) {
     const thisCard = this._cardsArr[this._cardsArr.findIndex((it) => it === oldData)];
 
-    switch (control) {
+
+    if (newData === null) {
+      console.log(oldData);
+    }
+
+    switch (newData) {
 
       case (`watchlist`):
         thisCard.inWatchList = thisCard.inWatchList !== true ? true : false;
@@ -106,10 +118,10 @@ export default class PageController {
         break;
     }
 
-    unrender(this._container.getElement());
-    this._container.removeElement();
+    unrender(this._filmsListContainer.getElement());
+    this._filmsListContainer.removeElement();
 
-    render(this._filmsList. getElement(), this._container.getElement(), Position.BEFOREEND);
+    render(this._filmsList. getElement(), this._filmsListContainer.getElement(), Position.BEFOREEND);
     const cardsList = this._cardsArr.slice();
     this._renderCards(cardsList);
     this._unrenderedCards = cardsList;
