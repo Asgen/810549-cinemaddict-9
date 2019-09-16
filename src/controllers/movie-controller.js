@@ -121,7 +121,7 @@ export default class MovieController {
         const newComment = {
           id: Math.floor(Math.random() * 5000000000),
           commentator: `John Doe`,
-          comment: encodeURI(commentInput.value).replace(/%20/gi, ` `),
+          comment: commentInput.value.replace(/[^а-яёa-z0-9\s\.]/gmi, ` `),
           reaction: this._detail.getElement().querySelector(`input[name="comment-emoji"]:checked`).value,
           commentDate: Date.now(),
         };
@@ -132,6 +132,11 @@ export default class MovieController {
         render(this._detail.getElement().querySelector(`.film-details__comments-list`), comment, Position.BEFOREEND);
 
         this._onDataChange(this._data, null);
+
+        let checkedInput = this._detail.getElement().querySelector(`INPUT[name="comment-emoji"]:checked`);
+        emojiContainer.innerHTML = ``;
+        commentInput.value = ``;
+        checkedInput.checked = false;
       }
 
     });
@@ -162,7 +167,7 @@ export default class MovieController {
     this._card.getElement().querySelector(`.film-card__comments`).addEventListener(`click`, () => onCardClick(this._data));
     this._card.getElement().querySelector(`.film-card__poster`).addEventListener(`click`, () => onCardClick(this._data));
 
-    render(this._container.getElement(), this._card.getElement(), Position.BEFOREEND);
+    render(this._container, this._card.getElement(), Position.BEFOREEND);
   }
 
   setDefaultView() {

@@ -1,56 +1,51 @@
 import {render, unrender, Position} from '../utils.js';
 
+import Search from '../components/search.js';
 import ShowMoreBtn from '../components/show-more-button.js';
-import SearchResult from '../components/search.js';
+import Films from '../components/films.js';
 import FilmsList from '../components/films-list.js';
 import FilmsContainer from '../components/films-container.js';
-import MovieController from '../controllers/movie-controller.js';
+import MovitListConrtroller from '../controllers/movie-list-controller.js';
 
 
 export default class SearchController {
-  constructor(cardsArr, container) {
-    this._cardsArr = cardsArr;
+  constructor(container, movies) {
+    this._cardsArr = movies;
     this._container = container;
+    this._querry = ``;
+    //this._searchResult = new Search();
     this._showMoreBtn = new ShowMoreBtn();
+    this._films = new Films();
     this._filmsList = new FilmsList();
     this._filmsListContainer = new FilmsContainer();
-    this._search = new SearchResult(115);
     this._unrenderedCards = 0;
 
     this._subscriptions = [];
     this._onDataChange = this._onDataChange.bind(this);
     this._onChangeView = this._onChangeView.bind(this);
+
+    this.init();
   }
 
   init() {
-    const cardsList = this._cardsArr.slice().filter((it) => it.description.includes(this._querry));
-
-    const body = document.querySelector(`body`);
-    const main = document.querySelector(`.main`);
-    render(main, this._search.getElement(), Position.BEFOREEND);
-    render(main, this._container, Position.BEFOREEND);
-    render(this._container, this._filmsList.getElement(), Position.BEFOREEND);
+    render(this._container, this._films.getElement(), Position.BEFOREEND);
+    render(this._films.getElement(), this._filmsList.getElement(), Position.BEFOREEND);
     render(this._filmsList.getElement(), this._filmsListContainer.getElement(), Position.BEFOREEND);
-
-    this._search.getElement().addEventListener(`click`, (e) => this._onSortClick(e));
-
-    if (this._cardsArr.length < 1) {
-      body.innerText = `There are no movies in our database`;
-    } else {
-      this._renderCards(cardsList);
-      this._unrenderedCards = cardsList;
-    }
-    this._showMoreBtn.getElement().addEventListener(`click`, () => {
-      if (this._unrenderedCards.length > 0) {
-        this._renderCards(this._unrenderedCards);
-      }
-      if (this._unrenderedCards.length < 1) {
-        unrender(this._showMoreBtn.getElement());
-      }
-    });
   }
 
-  show() {
+  show(querry) {
+
+    this._querry = querry;
+
+    const searchArr = this._cardsArr.slice().filter((it) => it.description.includes(`Lorem`));
+    //console.log(searchResult);
+
+    render(this._container, new Search(searchArr.length).getElement(), Position.AFTERBEGIN);
+
+    if (searchArr !== this._cardsArr) {
+      this._setCards(searchArr);
+    }
+
     this._container.classList.remove(`visually-hidden`);
   }
 
@@ -58,74 +53,38 @@ export default class SearchController {
     this._container.classList.add(`visually-hidden`);
   }
 
-  _renderCards(cardsArr) {
-    cardsArr.splice(0, 5).forEach((cardMock) => {
-      const movieController = new MovieController(this._filmsListContainer, cardMock, this._onDataChange, this._onChangeView);
-      this._subscriptions.push(movieController.setDefaultView.bind(movieController));
-    });
-    this._unrenderedCards = cardsArr;
+  _setCards(cardsArr) {
+    this._cardsArr = cardsArr;
 
-    if (cardsArr.length > 0) {
-      render(this._filmsList.getElement(), this._showMoreBtn.getElement(), Position.BEFOREEND);
-    }
-  }
+    const cardsList = this._cardsArr.slice();
+    const body = document.querySelector(`body`);
+    const movitListConrtroller = new MovitListConrtroller(this._filmsListContainer.getElement(), this._onDataChange, this._onChangeView);
 
-  _onSortClick(evt) {
-    evt.preventDefault();
-
-    if (evt.target.tagName !== `A`) {
-      return;
-    }
-
-    document.querySelector(`.sort__button--active`).classList.remove(`sort__button--active`);
-    evt.target.classList.add(`sort__button--active`);
-    this._filmsListContainer.getElement().innerHTML = ``;
-
-    switch (evt.target.dataset.sortType) {
-      case `date`:
-        const sortByDate = this._cardsArr.slice().sort((a, b) => a.date - b.date);
-        this._renderCards(sortByDate);
-        break;
-      case `rating`:
-        const sortByRating = this._cardsArr.slice().sort((a, b) => a.rate - b.rate);
-        this._renderCards(sortByRating);
-        break;
-      case `default`:
-        const sortByDefault = this._cardsArr.slice();
-        this._renderCards(sortByDefault);
-        break;
-    }
-  }
-
-  _onDataChange(oldData, newData) {
-    const thisCard = this._cardsArr[this._cardsArr.findIndex((it) => it === oldData)];
-
-
-    if (newData === null) {
-      // console.log(`comments modified`);
+    if (this._cardsArr.length < 1) {
+      body.innerText = `There are no movies in our database`;
     } else {
-
-      switch (newData) {
-
-        case (`watchlist`):
-          thisCard.inWatchList = thisCard.inWatchList !== true ? true : false;
-          break;
-        case (`watched`):
-          thisCard.isWatched = thisCard.isWatched !== true ? true : false;
-          break;
-        case (`favorite`):
-          thisCard.isFavorite = thisCard.isFavorite !== true ? true : false;
-          break;
-      }
+      movitListConrtroller.init(cardsList);
+      this._unrenderedCards = cardsList;
     }
+    this._showMoreBtn.getElement().addEventListener(`click`, () => {
+      if (this._unrenderedCards.length > 0) {
+        movitListConrtroller.init(this._unrenderedCards);
+      }
+      if (this._unrenderedCards.length < 1) {
+        unrender(this._showMoreBtn.getElement());
+      }
+    });
+  }
+
+  _onDataChange(newData) {
 
     unrender(this._filmsListContainer.getElement());
     this._filmsListContainer.removeElement();
 
     render(this._filmsList. getElement(), this._filmsListContainer.getElement(), Position.BEFOREEND);
-    const cardsList = this._cardsArr.slice();
-    this._renderCards(cardsList);
-    this._unrenderedCards = cardsList;
+    //const cardsList = this._cardsArr.slice();
+    this._setCards(newData);
+    this._unrenderedCards = newData;
   }
 
   _onChangeView() {

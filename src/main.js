@@ -4,7 +4,7 @@ import {render, Position} from '../src/utils.js';
 import SearchBar from '../src/components/search-bar.js';
 import Profile from '../src/components/profile.js';
 import Navigation from '../src/components/navigation.js';
-import Films from '../src/components/films.js';
+//import Films from '../src/components/films.js';
 
 import Statistic from '../src/components/statistic.js';
 import StatisticInfo from '../src/components/statistic-info.js';
@@ -17,7 +17,7 @@ import SearchController from '../src/controllers/search-controller.js';
 
 const header = document.querySelector(`.header`);
 const main = document.querySelector(`.main`);
-const filmsContainer = new Films();
+//const filmsContainer = new Films();
 const navigation = new Navigation(user);
 const searchBar = new SearchBar();
 render(header, searchBar.getElement(), Position.BEFOREEND);
@@ -31,10 +31,10 @@ render(statistic.getElement(), new StatisticFilters().getElement(), Position.BEF
 render(statistic.getElement(), new StatisticInfo(user).getElement(), Position.BEFOREEND);
 render(statistic.getElement(), new StatisticCanvas().getElement(), Position.BEFOREEND);
 
-const pageController = new PageController(cards, filmsContainer.getElement());
-const searchController = new SearchController(cards, filmsContainer.getElement());
-//searchController.hide();
-pageController.init();
+const pageController = new PageController(main);
+const searchController = new SearchController(main, cards);
+searchController.hide();
+pageController.show(cards);
 
 
 searchBar.getElement()
@@ -43,11 +43,9 @@ searchBar.getElement()
     evt.preventDefault();
     if (evt.target.value.length >= 3) {
       pageController.hide();
-      searchController.show();
+      searchController.show(evt.target.value);
     }
   });
-
-
 
 statistic.getElement().classList.add(`visually-hidden`);
 
@@ -61,19 +59,23 @@ navigation.getElement().addEventListener(`click`, (evt) => {
 
   switch (evt.target.dataset.navType) {
     case (`all`):
-      pageController.show();
+      pageController.show(cards);
+      searchController.hide();
       statistic.getElement().classList.add(`visually-hidden`);
       break;
     case (`watchlist`):
-      pageController.show();
+      pageController.show(cards);
+      searchController.hide();
       statistic.getElement().classList.add(`visually-hidden`);
       break;
     case (`history`):
-      pageController.show();
+      pageController.show(cards);
+      searchController.hide();
       statistic.getElement().classList.add(`visually-hidden`);
       break;
     case (`favorites`):
-      pageController.show();
+      pageController.show(cards);
+      searchController.hide();
       statistic.getElement().classList.add(`visually-hidden`);
       break;
     case (`stats`):
