@@ -1,6 +1,17 @@
 const CARDS_AMOUNT = 12;
 
+const getGanre = () => ([
+  `Thriller`,
+  `Thriller`,
+  `Comedy`,
+  `Biography`,
+  `Mystery`,
+  `Drama`,
+][Math.floor(Math.random() * 5)]);
+
+
 const makeComment = () => ({
+  id: Math.floor(Math.random() * 5000000000),
   commentator: `John Doe`,
   comment: [
     `That's on fleek!`,
@@ -70,13 +81,7 @@ const makeCard = () => ({
     110
   ][Math.floor(Math.random() * 3)],
   country: `USA`,
-  genre: new Set([
-    `Thriller`,
-    `Comedy`,
-    `Biography`,
-    `Mystery`,
-    `Drama`,
-  ]),
+  genre: new Set([getGanre(), getGanre()]),
   rate: [
     8.9,
     4.5,

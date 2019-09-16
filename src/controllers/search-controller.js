@@ -1,20 +1,20 @@
 import {render, unrender, Position} from '../utils.js';
 
 import ShowMoreBtn from '../components/show-more-button.js';
-import Sort from '../components/sort.js';
+import SearchResult from '../components/search.js';
 import FilmsList from '../components/films-list.js';
 import FilmsContainer from '../components/films-container.js';
 import MovieController from '../controllers/movie-controller.js';
 
 
-export default class PageController {
+export default class SearchController {
   constructor(cardsArr, container) {
     this._cardsArr = cardsArr;
     this._container = container;
     this._showMoreBtn = new ShowMoreBtn();
     this._filmsList = new FilmsList();
     this._filmsListContainer = new FilmsContainer();
-    this._sort = new Sort();
+    this._search = new SearchResult(115);
     this._unrenderedCards = 0;
 
     this._subscriptions = [];
@@ -23,16 +23,16 @@ export default class PageController {
   }
 
   init() {
-    const cardsList = this._cardsArr.slice();
+    const cardsList = this._cardsArr.slice().filter((it) => it.description.includes(this._querry));
 
     const body = document.querySelector(`body`);
     const main = document.querySelector(`.main`);
-    render(main, this._sort.getElement(), Position.BEFOREEND);
+    render(main, this._search.getElement(), Position.BEFOREEND);
     render(main, this._container, Position.BEFOREEND);
     render(this._container, this._filmsList.getElement(), Position.BEFOREEND);
     render(this._filmsList.getElement(), this._filmsListContainer.getElement(), Position.BEFOREEND);
 
-    this._sort.getElement().addEventListener(`click`, (e) => this._onSortClick(e));
+    this._search.getElement().addEventListener(`click`, (e) => this._onSortClick(e));
 
     if (this._cardsArr.length < 1) {
       body.innerText = `There are no movies in our database`;
@@ -52,12 +52,10 @@ export default class PageController {
 
   show() {
     this._container.classList.remove(`visually-hidden`);
-    this._sort.getElement().classList.remove(`visually-hidden`);
   }
 
   hide() {
     this._container.classList.add(`visually-hidden`);
-    this._sort.getElement().classList.add(`visually-hidden`);
   }
 
   _renderCards(cardsArr) {
