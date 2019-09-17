@@ -1,6 +1,7 @@
 import {render, unrender, Position} from '../utils.js';
 
 import Search from '../components/search.js';
+import SearchNoResult from '../components/search-no-result.js';
 import ShowMoreBtn from '../components/show-more-button.js';
 import Films from '../components/films.js';
 import FilmsList from '../components/films-list.js';
@@ -9,15 +10,17 @@ import MovitListConrtroller from '../controllers/movie-list-controller.js';
 
 
 export default class SearchController {
-  constructor(container, movies) {
-    this._cardsArr = movies;
+  constructor(container, input) {
+    this._cardsArr = [];
     this._container = container;
+    this._input = input;
     this._querry = ``;
-    //this._searchResult = new Search();
+    this._searchResult = new Search(0);
     this._showMoreBtn = new ShowMoreBtn();
     this._films = new Films();
     this._filmsList = new FilmsList();
     this._filmsListContainer = new FilmsContainer();
+    this._noResult = new SearchNoResult();
     this._unrenderedCards = 0;
 
     this._subscriptions = [];
@@ -31,38 +34,53 @@ export default class SearchController {
     render(this._container, this._films.getElement(), Position.BEFOREEND);
     render(this._films.getElement(), this._filmsList.getElement(), Position.BEFOREEND);
     render(this._filmsList.getElement(), this._filmsListContainer.getElement(), Position.BEFOREEND);
+
+    this._input.addEventListener(`keyup`, (evt) => {
+      if (evt.target.value.length < 3) {
+        return;
+      }
+      this.show(evt.target.value, this._cardsArr);
+    });
   }
 
-  show(querry) {
+  show(querry, cards) {
 
-    this._querry = querry;
+    this._cardsArr = cards;
+    this._querry = querry.replace(/[^а-яёa-z0-9\s\.]/gmi, ` `);
+    let re = new RegExp(this._querry, `gim`);
 
-    const searchArr = this._cardsArr.slice().filter((it) => it.description.includes(`Lorem`));
-    //console.log(searchResult);
+    const searchArr = this._cardsArr.filter((it) => it.title.match(re) !== null);
 
-    render(this._container, new Search(searchArr.length).getElement(), Position.AFTERBEGIN);
-
-    if (searchArr !== this._cardsArr) {
-      this._setCards(searchArr);
+    if (this._container.contains(this._searchResult.getElement())) {
+      unrender(this._searchResult.getElement());
     }
+    this._searchResult.setCount(searchArr.length);
+    render(this._container, this._searchResult.getElement(), Position.AFTERBEGIN);
 
-    this._container.classList.remove(`visually-hidden`);
+    this._filmsListContainer.getElement().innerHTML = ``;
+    this._setCards(searchArr);
+
+    this._films.getElement().classList.remove(`visually-hidden`);
+    this._searchResult.getElement().classList.remove(`visually-hidden`);
   }
 
   hide() {
-    this._container.classList.add(`visually-hidden`);
+    this._films.getElement().classList.add(`visually-hidden`);
+    this._searchResult.getElement().classList.add(`visually-hidden`);
+
   }
 
-  _setCards(cardsArr) {
-    this._cardsArr = cardsArr;
+  _setCards(cards) {
 
-    const cardsList = this._cardsArr.slice();
-    const body = document.querySelector(`body`);
+    const cardsList = cards.slice();
     const movitListConrtroller = new MovitListConrtroller(this._filmsListContainer.getElement(), this._onDataChange, this._onChangeView);
 
-    if (this._cardsArr.length < 1) {
-      body.innerText = `There are no movies in our database`;
+    if (cardsList.length < 1) {
+      render(this._filmsList.getElement(), this._noResult.getElement(), Position.AFTERBEGIN);
     } else {
+      if (this._filmsList.getElement().contains(this._noResult.getElement())) {
+        unrender(this._noResult.getElement());
+      }
       movitListConrtroller.init(cardsList);
       this._unrenderedCards = cardsList;
     }
@@ -82,7 +100,6 @@ export default class SearchController {
     this._filmsListContainer.removeElement();
 
     render(this._filmsList. getElement(), this._filmsListContainer.getElement(), Position.BEFOREEND);
-    //const cardsList = this._cardsArr.slice();
     this._setCards(newData);
     this._unrenderedCards = newData;
   }

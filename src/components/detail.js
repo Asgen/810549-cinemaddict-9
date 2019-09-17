@@ -1,5 +1,4 @@
 import moment from 'moment';
-import {render, createElement, Position} from '../utils.js';
 import AbstractComponent from '../components/AbstractComponent.js';
 
 export default class ShowMoreBtn extends AbstractComponent {

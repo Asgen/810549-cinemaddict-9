@@ -27,6 +27,7 @@ const makeComment = () => ({
 });
 
 const makeCard = () => ({
+  id: Math.floor(Math.random() * 50000000),
   title: [
     `My Best Friend's Birthday`,
     `Pulp Fiction`,
@@ -44,11 +45,11 @@ const makeCard = () => ({
     `Once Upon a Time in Holywood`,
     `Thursday`
   ][Math.floor(Math.random() * 15)],
-  description: [`Lorem ipsum dolor sit amet, consectetur adipiscing elit.`,
+  description: [`Lorem ipsum okk sit amet, consectetur adipiscing elit.`,
     `Cras aliquet varius magna, non porta ligula feugiat eget.`,
-    `Fusce tristique felis at fermentum pharetra.`,
+    `Fusce tristique okk at fermentum pharetra.`,
     `Aliquam id orci ut lectus varius viverra.`,
-    `Nullam nunc ex, convallis sed finibus eget, sollicitudin eget ante.`,
+    `Nullam nunc ex, okk boy sed finibus eget, sollicitudin eget ante.`,
     `Phasellus eros mauris, condimentum sed nibh vitae, sodales efficitur ipsum.`,
     `Sed blandit, eros vel aliquam faucibus, purus ex euismod diam, eu luctus nunc ante ut dui.`,
     `Sed sed nisi sed augue convallis suscipit in sed felis.`,
@@ -96,7 +97,7 @@ const makeCard = () => ({
 });
 
 const cardsList = Array.from(Array(CARDS_AMOUNT))
-  .map(makeCard);
+  .map(makeCard).sort((a, b) => a.id - b.id);
 
 const user = {
   rating: [

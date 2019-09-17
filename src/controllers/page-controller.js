@@ -1,5 +1,5 @@
 import {render, unrender, Position} from '../utils.js';
-
+import Navigation from '../components/navigation.js';
 import Films from '../components/films.js';
 import ShowMoreBtn from '../components/show-more-button.js';
 import Sort from '../components/sort.js';
@@ -7,11 +7,19 @@ import FilmsList from '../components/films-list.js';
 import FilmsContainer from '../components/films-container.js';
 import MovitListConrtroller from '../controllers/movie-list-controller.js';
 
+import Statistic from '../components/statistic.js';
+import StatisticInfo from '../components/statistic-info.js';
+import StatisticFilters from '../components/statistic-filters.js';
+import StatisticRank from '../components/statistic-rank.js';
+import StatisticCanvas from '../components/statistic-canvas.js';
+
 
 export default class PageController {
-  constructor(container) {
+  constructor(container, user) {
     this._cardsArr = [];
     this._container = container;
+    this._user = user;
+    this._navigation = new Navigation(user);
     this._showMoreBtn = new ShowMoreBtn();
     this._films = new Films();
     this._filmsList = new FilmsList();
@@ -28,27 +36,71 @@ export default class PageController {
 
   init() {
 
+    render(this._container, this._navigation.getElement(), Position.BEFOREEND);
     render(this._container, this._sort.getElement(), Position.BEFOREEND);
     render(this._container, this._films.getElement(), Position.BEFOREEND);
     render(this._films.getElement(), this._filmsList.getElement(), Position.BEFOREEND);
     render(this._filmsList.getElement(), this._filmsListContainer.getElement(), Position.BEFOREEND);
 
     this._sort.getElement().addEventListener(`click`, (e) => this._onSortClick(e));
+
+    this._navigation.getElement().addEventListener(`click`, (evt) => {
+      if (evt.target.tagName !== `A`) {
+        return;
+      }
+
+      document.querySelector(`.main-navigation__item--active`).classList.remove(`main-navigation__item--active`);
+      evt.target.classList.add(`main-navigation__item--active`);
+
+      switch (evt.target.dataset.navType) {
+        case (`all`):
+          this.show(this._cardsArr);
+          statistic.getElement().classList.add(`visually-hidden`);
+          break;
+        case (`watchlist`):
+          this.show(this._cardsArr);
+          statistic.getElement().classList.add(`visually-hidden`);
+          break;
+        case (`history`):
+          this.show(this._cardsArr);
+          statistic.getElement().classList.add(`visually-hidden`);
+          break;
+        case (`favorites`):
+          this.show(this._cardsArr);
+          statistic.getElement().classList.add(`visually-hidden`);
+          break;
+        case (`stats`):
+          this.hide();
+          this._navigation.getElement().classList.remove(`visually-hidden`);
+          statistic.getElement().classList.remove(`visually-hidden`);
+          break;
+      }
+    });
+
+    const statistic = new Statistic();
+    render(this._container, statistic.getElement(), Position.BEFOREEND);
+    render(statistic.getElement(), new StatisticRank(this._user).getElement(), Position.BEFOREEND);
+    render(statistic.getElement(), new StatisticFilters().getElement(), Position.BEFOREEND);
+    render(statistic.getElement(), new StatisticInfo(this._user).getElement(), Position.BEFOREEND);
+    render(statistic.getElement(), new StatisticCanvas().getElement(), Position.BEFOREEND);
+
+    statistic.getElement().classList.add(`visually-hidden`);
+
   }
 
   show(movies) {
-    if (movies !== this._cardsArr) {
-      this._setCards(movies);
-    }
 
-    this._container.classList.remove(`visually-hidden`);
+    this._setCards(movies);
+
+    this._films.getElement().classList.remove(`visually-hidden`);
     this._sort.getElement().classList.remove(`visually-hidden`);
+    this._navigation.getElement().classList.remove(`visually-hidden`);
   }
 
   hide() {
-    //this._container.innerHTML = ``;
-    this._container.classList.add(`visually-hidden`);
+    this._films.getElement().classList.add(`visually-hidden`);
     this._sort.getElement().classList.add(`visually-hidden`);
+    this._navigation.getElement().classList.add(`visually-hidden`);
   }
 
   _setCards(cardsArr) {
@@ -56,6 +108,7 @@ export default class PageController {
 
     const cardsList = this._cardsArr.slice();
     const body = document.querySelector(`body`);
+    this._filmsListContainer.getElement().innerHTML = ``;
     const movitListConrtroller = new MovitListConrtroller(this._filmsListContainer.getElement(), this._onDataChange, this._onChangeView);
 
     if (this._cardsArr.length < 1) {
@@ -95,7 +148,7 @@ export default class PageController {
         this._setCards(sortByRating);
         break;
       case `default`:
-        const sortByDefault = this._cardsArr.slice();
+        const sortByDefault = this._cardsArr.slice().sort((a, b) => a.id - b.id);
         this._setCards(sortByDefault);
         break;
     }
