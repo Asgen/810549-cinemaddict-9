@@ -110,7 +110,7 @@ const user = {
   favorites: cardsList.filter((card) => card.isFavorite),
 };
 
-const allGenres = user.favorites
+const allGenres = user.history
   .reduce((prev, curr) => {
     return [...prev, ...curr.genre];
   }, [])
@@ -122,11 +122,10 @@ const allGenres = user.favorites
 let bestGanre = 0;
 
 for (let key in allGenres) {
-  if (allGenres[key] > bestGanre) {
-    bestGanre = key;
+  if (parseInt(allGenres[key], 10) > bestGanre) {
+    bestGanre = parseInt(allGenres[key], 10);
+    user.topGenre = key;
   }
 }
-
-user.topGenre = bestGanre;
 
 export {cardsList, makeCard, user};

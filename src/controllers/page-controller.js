@@ -1,4 +1,6 @@
 import {render, unrender, Position} from '../utils.js';
+import {getWatchedGenres} from '../functions.js';
+import {renderStatisticChart} from '../chart-options.js';
 import Navigation from '../components/navigation.js';
 import Films from '../components/films.js';
 import ShowMoreBtn from '../components/show-more-button.js';
@@ -12,7 +14,6 @@ import StatisticInfo from '../components/statistic-info.js';
 import StatisticFilters from '../components/statistic-filters.js';
 import StatisticRank from '../components/statistic-rank.js';
 import StatisticCanvas from '../components/statistic-canvas.js';
-
 
 export default class PageController {
   constructor(container, user) {
@@ -86,6 +87,13 @@ export default class PageController {
 
     statistic.getElement().classList.add(`visually-hidden`);
 
+    const daysCtx = document.querySelector(`.statistic__chart`);
+
+    const allGeneres = getWatchedGenres(this._user.history);
+    const labelsForChart = [...Object.keys(allGeneres)];
+    const dataForChart = [...Object.values(allGeneres)];
+
+    renderStatisticChart(daysCtx, labelsForChart, dataForChart);
   }
 
   show(movies) {
