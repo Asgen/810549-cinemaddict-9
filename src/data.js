@@ -1,6 +1,17 @@
 const CARDS_AMOUNT = 12;
 
+const getGanre = () => ([
+  `Thriller`,
+  `Thriller`,
+  `Comedy`,
+  `Biography`,
+  `Mystery`,
+  `Drama`,
+][Math.floor(Math.random() * 5)]);
+
+
 const makeComment = () => ({
+  id: Math.floor(Math.random() * 5000000000),
   commentator: `John Doe`,
   comment: [
     `That's on fleek!`,
@@ -16,6 +27,7 @@ const makeComment = () => ({
 });
 
 const makeCard = () => ({
+  id: Math.floor(Math.random() * 50000000),
   title: [
     `My Best Friend's Birthday`,
     `Pulp Fiction`,
@@ -33,11 +45,11 @@ const makeCard = () => ({
     `Once Upon a Time in Holywood`,
     `Thursday`
   ][Math.floor(Math.random() * 15)],
-  description: [`Lorem ipsum dolor sit amet, consectetur adipiscing elit.`,
+  description: [`Lorem ipsum okk sit amet, consectetur adipiscing elit.`,
     `Cras aliquet varius magna, non porta ligula feugiat eget.`,
-    `Fusce tristique felis at fermentum pharetra.`,
+    `Fusce tristique okk at fermentum pharetra.`,
     `Aliquam id orci ut lectus varius viverra.`,
-    `Nullam nunc ex, convallis sed finibus eget, sollicitudin eget ante.`,
+    `Nullam nunc ex, okk boy sed finibus eget, sollicitudin eget ante.`,
     `Phasellus eros mauris, condimentum sed nibh vitae, sodales efficitur ipsum.`,
     `Sed blandit, eros vel aliquam faucibus, purus ex euismod diam, eu luctus nunc ante ut dui.`,
     `Sed sed nisi sed augue convallis suscipit in sed felis.`,
@@ -65,18 +77,12 @@ const makeCard = () => ({
   ]),
   date: Date.now() + 1 + Math.floor((Math.random() * 15000) - 14999) * 24 * 60 * 60 * 1000,
   duration: [
-    `1h 15m`,
-    `1h 20m`,
-    `2h 07m`
+    77,
+    80,
+    110
   ][Math.floor(Math.random() * 3)],
   country: `USA`,
-  genre: new Set([
-    `Thriller`,
-    `Comedy`,
-    `Biography`,
-    `Mystery`,
-    `Drama`,
-  ]),
+  genre: new Set([getGanre(), getGanre()]),
   rate: [
     8.9,
     4.5,
@@ -91,8 +97,7 @@ const makeCard = () => ({
 });
 
 const cardsList = Array.from(Array(CARDS_AMOUNT))
-  .map(makeCard);
-
+  .map(makeCard).sort((a, b) => a.id - b.id);
 
 const user = {
   rating: [
@@ -101,8 +106,27 @@ const user = {
     `Movie Buff`
   ][Math.floor(Math.random() * 3)],
   watchlist: cardsList.filter((card) => card.inWatchList).length,
-  history: cardsList.filter((card) => card.isWatched).length,
-  favorites: cardsList.filter((card) => card.isFavorite).length,
+  history: cardsList.filter((card) => card.isWatched),
+  favorites: cardsList.filter((card) => card.isFavorite),
 };
+
+const allGenres = user.favorites
+  .reduce((prev, curr) => {
+    return [...prev, ...curr.genre];
+  }, [])
+  .reduce((acc, el) => {
+    acc[el] = (acc[el] || 0) + 1;
+    return acc;
+  }, {});
+
+let bestGanre = 0;
+
+for (let key in allGenres) {
+  if (allGenres[key] > bestGanre) {
+    bestGanre = key;
+  }
+}
+
+user.topGenre = bestGanre;
 
 export {cardsList, makeCard, user};
