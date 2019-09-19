@@ -1,7 +1,7 @@
 import AbstractComponent from '../components/AbstractComponent.js';
 
 export default class StatisticRank extends AbstractComponent {
-  constructor({rating}) {
+  constructor(rating) {
     super();
     this._rank = rating;
   }
@@ -9,7 +9,7 @@ export default class StatisticRank extends AbstractComponent {
     return `<p class="statistic__rank">
       Your rank
       <img class="statistic__img" src="images/bitmap@2x.png" alt="Avatar" width="35" height="35">
-      <span class="statistic__rank-label">${this._rank}</span>
+      <span class="statistic__rank-label">${this._rank ? this._rank : `-`}</span>
     </p>`;
   }
 }

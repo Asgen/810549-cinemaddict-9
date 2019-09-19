@@ -1,5 +1,4 @@
 import {render, unrender, Position} from '../utils.js';
-import {getWatchedGenres} from '../functions.js';
 import {renderStatisticChart} from '../chart-options.js';
 import Navigation from '../components/navigation.js';
 import Films from '../components/films.js';
@@ -8,19 +7,15 @@ import Sort from '../components/sort.js';
 import FilmsList from '../components/films-list.js';
 import FilmsContainer from '../components/films-container.js';
 import MovitListConrtroller from '../controllers/movie-list-controller.js';
-
-import Statistic from '../components/statistic.js';
-import StatisticInfo from '../components/statistic-info.js';
-import StatisticFilters from '../components/statistic-filters.js';
-import StatisticRank from '../components/statistic-rank.js';
-import StatisticCanvas from '../components/statistic-canvas.js';
+import StatisticConrtoller from '../controllers/statistic-controller.js';
+import UserData from '../data/user-data.js';
 
 export default class PageController {
-  constructor(container, user) {
+  constructor(container) {
     this._cardsArr = [];
     this._container = container;
-    this._user = user;
-    this._navigation = new Navigation(user);
+    this._userData = new UserData();
+    this._navigation = new Navigation();
     this._showMoreBtn = new ShowMoreBtn();
     this._films = new Films();
     this._filmsList = new FilmsList();
@@ -36,7 +31,6 @@ export default class PageController {
   }
 
   init() {
-
     render(this._container, this._navigation.getElement(), Position.BEFOREEND);
     render(this._container, this._sort.getElement(), Position.BEFOREEND);
     render(this._container, this._films.getElement(), Position.BEFOREEND);
@@ -45,59 +39,15 @@ export default class PageController {
 
     this._sort.getElement().addEventListener(`click`, (e) => this._onSortClick(e));
 
-    this._navigation.getElement().addEventListener(`click`, (evt) => {
-      if (evt.target.tagName !== `A`) {
-        return;
-      }
-
-      document.querySelector(`.main-navigation__item--active`).classList.remove(`main-navigation__item--active`);
-      evt.target.classList.add(`main-navigation__item--active`);
-
-      switch (evt.target.dataset.navType) {
-        case (`all`):
-          this.show(this._cardsArr);
-          statistic.getElement().classList.add(`visually-hidden`);
-          break;
-        case (`watchlist`):
-          this.show(this._cardsArr);
-          statistic.getElement().classList.add(`visually-hidden`);
-          break;
-        case (`history`):
-          this.show(this._cardsArr);
-          statistic.getElement().classList.add(`visually-hidden`);
-          break;
-        case (`favorites`):
-          this.show(this._cardsArr);
-          statistic.getElement().classList.add(`visually-hidden`);
-          break;
-        case (`stats`):
-          this.hide();
-          this._navigation.getElement().classList.remove(`visually-hidden`);
-          statistic.getElement().classList.remove(`visually-hidden`);
-          break;
-      }
-    });
-
-    const statistic = new Statistic();
-    render(this._container, statistic.getElement(), Position.BEFOREEND);
-    render(statistic.getElement(), new StatisticRank(this._user).getElement(), Position.BEFOREEND);
-    render(statistic.getElement(), new StatisticFilters().getElement(), Position.BEFOREEND);
-    render(statistic.getElement(), new StatisticInfo(this._user).getElement(), Position.BEFOREEND);
-    render(statistic.getElement(), new StatisticCanvas().getElement(), Position.BEFOREEND);
-
-    statistic.getElement().classList.add(`visually-hidden`);
-
-    const daysCtx = document.querySelector(`.statistic__chart`);
-
-    const allGeneres = getWatchedGenres(this._user.history);
-    const labelsForChart = [...Object.keys(allGeneres)];
-    const dataForChart = [...Object.values(allGeneres)];
-
-    renderStatisticChart(daysCtx, labelsForChart, dataForChart);
+    this._statisticController = new StatisticConrtoller(this._container);
+    this._statisticController.init();
+    this._statisticController.hide();
   }
 
   show(movies) {
 
+    this._userData.update(movies);
+    this._updateNavigation(movies);
     this._setCards(movies);
 
     this._films.getElement().classList.remove(`visually-hidden`);
@@ -152,7 +102,7 @@ export default class PageController {
         this._setCards(sortByDate);
         break;
       case `rating`:
-        const sortByRating = this._cardsArr.slice().sort((a, b) => a.rate - b.rate);
+        const sortByRating = this._cardsArr.slice().sort((a, b) => a.total_rating - b.total_rating);
         this._setCards(sortByRating);
         break;
       case `default`:
@@ -160,6 +110,50 @@ export default class PageController {
         this._setCards(sortByDefault);
         break;
     }
+  }
+
+  _onNavigationClick(evt) {
+    if (evt.target.tagName !== `A`) {
+      return;
+    }
+
+    document.querySelector(`.main-navigation__item--active`).classList.remove(`main-navigation__item--active`);
+    evt.target.classList.add(`main-navigation__item--active`);
+
+    switch (evt.target.dataset.navType) {
+      case (`all`):
+        this.show(this._cardsArr);
+        this._statisticController.hide();
+        break;
+      case (`watchlist`):
+        this.show(this._cardsArr);
+        this._statisticController.hide();
+        break;
+      case (`history`):
+        this.show(this._cardsArr);
+        this._statisticController.hide();
+        break;
+      case (`favorites`):
+        this.show(this._cardsArr);
+        this._statisticController.hide();
+        break;
+      case (`stats`):
+        this.hide();
+        this._navigation.getElement().classList.remove(`visually-hidden`);
+        this._statisticController.render(this._userData.countActivity());
+        this._statisticController.show();
+        break;
+    }
+
+  }
+
+  _updateNavigation() {
+    this._navigation.getElement().removeEventListener(`click`, (evt) => this._onNavigationClick(evt));
+    unrender(this._navigation.getElement());
+    this._navigation.removeElement();
+    this._navigation.update(this._userData.countActivity());
+    render(this._container, this._navigation.getElement(), Position.AFTERBEGIN);
+    this._navigation.getElement().addEventListener(`click`, (evt) => this._onNavigationClick(evt));
   }
 
   _onDataChange(newData) {
@@ -170,6 +164,9 @@ export default class PageController {
     render(this._filmsList. getElement(), this._filmsListContainer.getElement(), Position.BEFOREEND);
     this._setCards(newData);
     this._unrenderedCards = newData;
+
+    this._userData.update(newData);
+    this._updateNavigation(newData);
   }
 
   _onChangeView() {

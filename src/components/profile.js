@@ -1,9 +1,9 @@
 import AbstractComponent from '../components/AbstractComponent.js';
 
 export default class Profile extends AbstractComponent {
-  constructor({rating}) {
+  constructor({watchlist}) {
     super();
-    this._rating = rating;
+    this._rating = watchlist;
   }
   getTemplate() {
     return `<section class="header__profile profile">

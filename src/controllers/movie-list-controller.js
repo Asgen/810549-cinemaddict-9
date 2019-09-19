@@ -55,19 +55,19 @@ export default class MovitListConrtroller {
     const thisCard = this._cardsArr[this._cardsArr.findIndex((it) => it === oldData)];
 
     if (newData === null) {
-      // console.log(`comments modified`);
+      // console.log(`comment modified`);
     } else {
 
       switch (newData) {
 
         case (`watchlist`):
-          thisCard.inWatchList = thisCard.inWatchList !== true ? true : false;
+          thisCard.user_details.inWatchList = thisCard.user_details.inWatchList !== true ? true : false;
           break;
         case (`watched`):
-          thisCard.isWatched = thisCard.isWatched !== true ? true : false;
+          thisCard.user_details.isWatched = thisCard.user_details.isWatched !== true ? true : false;
           break;
         case (`favorite`):
-          thisCard.isFavorite = thisCard.isFavorite !== true ? true : false;
+          thisCard.user_details.isFavorite = thisCard.user_details.isFavorite !== true ? true : false;
           break;
       }
     }
