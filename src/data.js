@@ -99,7 +99,12 @@ const makeCard = () => ({
     "isFavorite": Boolean(Math.round(Math.random())),
     "isWatched": Boolean(Math.round(Math.random())),
     "inWatchList": Boolean(Math.round(Math.random())),
-    "watching_date": `2019-05-11T16:12:32.554Z`,
+    "watching_date": [
+      `2019-09-21T16:12:32.554Z`,
+      `2019-09-28T16:12:32.554Z`,
+      `2019-09-20T16:12:32.554Z`,
+      `2019-09-19T16:12:32.554Z`
+    ][Math.floor(Math.random() * 4)],
   },
   "comments": Array.from(Array(Math.floor(Math.random() * 5))).map(makeComment),
 });
@@ -107,28 +112,4 @@ const makeCard = () => ({
 const cardsList = Array.from(Array(CARDS_AMOUNT))
   .map(makeCard).sort((a, b) => a.id - b.id);
 
-const userInfo = {
-  watchlist: cardsList.filter((card) => card.user_details.inWatchList).length,
-  history: cardsList.filter((card) => card.user_details.isWatched),
-  favorites: cardsList.filter((card) => card.user_details.isFavorite),
-};
-
-/*const allGenres = userInfo.history
-  .reduce((prev, curr) => {
-    return [...prev, ...curr.genre];
-  }, [])
-  .reduce((acc, el) => {
-    acc[el] = (acc[el] || 0) + 1;
-    return acc;
-  }, {});
-
-let bestGanre = 0;
-
-for (let key in allGenres) {
-  if (parseInt(allGenres[key], 10) > bestGanre) {
-    bestGanre = parseInt(allGenres[key], 10);
-    userInfo.topGenre = key;
-  }
-}*/
-
-export {cardsList, makeCard, userInfo};
+export {cardsList, makeCard};

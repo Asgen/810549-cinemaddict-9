@@ -1,5 +1,4 @@
 import {render, unrender, Position} from '../utils.js';
-import {renderStatisticChart} from '../chart-options.js';
 import Navigation from '../components/navigation.js';
 import Films from '../components/films.js';
 import ShowMoreBtn from '../components/show-more-button.js';
@@ -22,6 +21,7 @@ export default class PageController {
     this._filmsListContainer = new FilmsContainer();
     this._sort = new Sort();
     this._unrenderedCards = 0;
+    this._filteredMovies = null;
 
     this._subscriptions = [];
     this._onDataChange = this._onDataChange.bind(this);
@@ -40,14 +40,15 @@ export default class PageController {
     this._sort.getElement().addEventListener(`click`, (e) => this._onSortClick(e));
 
     this._statisticController = new StatisticConrtoller(this._container);
-    this._statisticController.init();
     this._statisticController.hide();
   }
 
-  show(movies) {
-
+  update(movies) {
     this._userData.update(movies);
-    this._updateNavigation(movies);
+    this._updateNavigation();
+  }
+
+  show(movies) {
     this._setCards(movies);
 
     this._films.getElement().classList.remove(`visually-hidden`);
@@ -59,12 +60,16 @@ export default class PageController {
     this._films.getElement().classList.add(`visually-hidden`);
     this._sort.getElement().classList.add(`visually-hidden`);
     this._navigation.getElement().classList.add(`visually-hidden`);
+    this._statisticController.hide();
   }
 
   _setCards(cardsArr) {
-    this._cardsArr = cardsArr;
+    if (!this._filteredMovies) {
+      this._cardsArr = cardsArr;
+    }
 
-    const cardsList = this._cardsArr.slice();
+    const cardsList = this._filteredMovies ? this._filteredMovies : this._cardsArr.slice();
+
     const body = document.querySelector(`body`);
     this._filmsListContainer.getElement().innerHTML = ``;
     const movitListConrtroller = new MovitListConrtroller(this._filmsListContainer.getElement(), this._onDataChange, this._onChangeView);
@@ -117,47 +122,67 @@ export default class PageController {
       return;
     }
 
-    document.querySelector(`.main-navigation__item--active`).classList.remove(`main-navigation__item--active`);
+    this._navigation.getElement().querySelector(`.main-navigation__item--active`).classList.remove(`main-navigation__item--active`);
     evt.target.classList.add(`main-navigation__item--active`);
 
     switch (evt.target.dataset.navType) {
       case (`all`):
+        this._filteredMovies = null;
         this.show(this._cardsArr);
         this._statisticController.hide();
         break;
       case (`watchlist`):
-        this.show(this._cardsArr);
+        this._filteredMovies = this._cardsArr.filter((it) => it.user_details.inWatchList === true);
+        this.show(this._filteredMovies);
         this._statisticController.hide();
         break;
       case (`history`):
+        this._filteredMovies = this._cardsArr.filter((it) => it.user_details.isWatched === true);
         this.show(this._cardsArr);
         this._statisticController.hide();
         break;
       case (`favorites`):
+        this._filteredMovies = this._cardsArr.filter((it) => it.user_details.isFavorite === true);
         this.show(this._cardsArr);
         this._statisticController.hide();
         break;
       case (`stats`):
         this.hide();
         this._navigation.getElement().classList.remove(`visually-hidden`);
-        this._statisticController.render(this._userData.countActivity());
-        this._statisticController.show();
+        this._statisticController.show(this._userData.watchedFilms);
         break;
     }
 
   }
 
   _updateNavigation() {
+    const currentActiveLink = this._navigation.getElement().querySelector(`.main-navigation__item--active`);
+
     this._navigation.getElement().removeEventListener(`click`, (evt) => this._onNavigationClick(evt));
     unrender(this._navigation.getElement());
     this._navigation.removeElement();
+
     this._navigation.update(this._userData.countActivity());
     render(this._container, this._navigation.getElement(), Position.AFTERBEGIN);
+
+    // Сохраняем выделенный пункт меню
+    if (currentActiveLink.dataset.navType !== `all`) {
+      this._navigation.getElement().querySelector(`.main-navigation__item--active`).classList.remove(`main-navigation__item--active`);
+
+      this._navigation.getElement().querySelector(`[data-nav-type=${currentActiveLink.dataset.navType}]`).classList.add(`main-navigation__item--active`);
+    }
     this._navigation.getElement().addEventListener(`click`, (evt) => this._onNavigationClick(evt));
   }
 
   _onDataChange(newData) {
 
+    if (this._filteredMovies) {
+      this._filteredMovies = newData;
+    } else {
+      this._cardsArr = newData;
+    }
+
+    const userRang = document.querySelector(`.profile__rating`);
     unrender(this._filmsListContainer.getElement());
     this._filmsListContainer.removeElement();
 
@@ -165,8 +190,9 @@ export default class PageController {
     this._setCards(newData);
     this._unrenderedCards = newData;
 
-    this._userData.update(newData);
-    this._updateNavigation(newData);
+    this._userData.update(this._cardsArr);
+    this._updateNavigation();
+    userRang.innerHTML = this._userData.rank;
   }
 
   _onChangeView() {

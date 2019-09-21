@@ -82,6 +82,8 @@ const renderStatisticChart = (container, labelsArr, dataArr) => {
     },
     options: chartOptions,
   });
+
+  return daysChart;
 };
 
 export {renderStatisticChart};

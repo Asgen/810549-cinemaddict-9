@@ -6,6 +6,7 @@ export default class UserData {
     this.rate = 0;
     this.topGenre = ``;
     this.totalDuration = 0;
+    this.rank = ``;
   }
 
   update(cards) {
@@ -17,6 +18,7 @@ export default class UserData {
       return previousValue + currentValue.duration;
     }, 0);
     this._setTopGenre();
+    this._getRank(this.watchedFilms.length);
   }
 
   watchedGenres() {
@@ -46,5 +48,23 @@ export default class UserData {
     x.watchedGenres = this.watchedGenres();
 
     return x;
+  }
+
+  _getRank(watchedFilmsLength) {
+    switch (true) {
+      case (watchedFilmsLength < 1):
+        this.rank = ``;
+        break;
+      case (watchedFilmsLength > 0 && watchedFilmsLength < 11):
+        this.rank = `Novice`;
+        break;
+      case (watchedFilmsLength > 10 && watchedFilmsLength < 21):
+        this.rank = `Fan`;
+        break;
+      case (watchedFilmsLength > 20):
+        this.rank = `Movie Buff`;
+        break;
+    }
+    return this.rank;
   }
 }

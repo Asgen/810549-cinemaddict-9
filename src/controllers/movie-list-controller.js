@@ -65,6 +65,9 @@ export default class MovitListConrtroller {
           break;
         case (`watched`):
           thisCard.user_details.isWatched = thisCard.user_details.isWatched !== true ? true : false;
+          if (thisCard.user_details.isWatched) {
+            thisCard.user_details[`watching_date`] = new Date().toISOString();
+          }
           break;
         case (`favorite`):
           thisCard.user_details.isFavorite = thisCard.user_details.isFavorite !== true ? true : false;
