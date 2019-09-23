@@ -9,6 +9,8 @@ import MovitListConrtroller from '../controllers/movie-list-controller.js';
 import StatisticConrtoller from '../controllers/statistic-controller.js';
 import UserData from '../data/user-data.js';
 
+const CARDS_IN_ROW = 5;
+
 export default class PageController {
   constructor(container) {
     this._cardsArr = [];
@@ -23,14 +25,17 @@ export default class PageController {
     this._unrenderedCards = 0;
     this._filteredMovies = null;
 
-    this._subscriptions = [];
-    this._onDataChange = this._onDataChange.bind(this);
-    this._onChangeView = this._onChangeView.bind(this);
+    this._showedMovies = CARDS_IN_ROW;
 
-    this.init();
+    this._subscriptions = [];
+
+    this._movitListConrtroller = new MovitListConrtroller(this._filmsListContainer.getElement(), this._onDataChange.bind(this));
+    this._statisticController = new StatisticConrtoller(this._container);
+
+    this._init();
   }
 
-  init() {
+  _init() {
     render(this._container, this._navigation.getElement(), Position.BEFOREEND);
     render(this._container, this._sort.getElement(), Position.BEFOREEND);
     render(this._container, this._films.getElement(), Position.BEFOREEND);
@@ -38,9 +43,50 @@ export default class PageController {
     render(this._filmsList.getElement(), this._filmsListContainer.getElement(), Position.BEFOREEND);
 
     this._sort.getElement().addEventListener(`click`, (e) => this._onSortClick(e));
-
-    this._statisticController = new StatisticConrtoller(this._container);
     this._statisticController.hide();
+  }
+
+  _renderPage() {
+    render(this._filmsList.getElement(), this._filmsListContainer.getElement(), Position.BEFOREEND);
+
+    unrender(this._showMoreBtn.getElement());
+    this._showMoreBtn.removeElement();
+    if (this._showedMovies < this._cardsArr.length) {
+      render(this._filmsList.getElement(), this._showMoreBtn.getElement(), Position.BEFOREEND);
+    }
+
+    this._movitListConrtroller._setCards(this._cardsArr.slice(0, this._showedMovies));
+
+    this._showMoreBtn.getElement()
+      .addEventListener(`click`, () => this._onLoadMoreButtonClick());
+  }
+
+  _onLoadMoreButtonClick() {
+    this._movitListConrtroller.addTasks(this._cardsArr.slice(this._showedMovies, this._showedMovies + CARDS_IN_ROW));
+
+    this._showedMovies += CARDS_IN_ROW;
+
+    if (this._showedMovies >= this._cardsArr.length) {
+      unrender(this._showMoreBtn.getElement());
+      this._showMoreBtn.removeElement();
+    }
+  }
+
+  _setCards(cards) {
+    this._cardsArr = cards;
+    this._showedMovies = CARDS_IN_ROW;
+
+    this._renderPage();
+  }
+
+  show(cards) {
+    if (cards !== this._cardsArr) {
+      this._setCards(cards);
+    }
+
+    this._films.getElement().classList.remove(`visually-hidden`);
+    this._sort.getElement().classList.remove(`visually-hidden`);
+    this._navigation.getElement().classList.remove(`visually-hidden`);
   }
 
   update(movies) {
@@ -48,46 +94,11 @@ export default class PageController {
     this._updateNavigation();
   }
 
-  show(movies) {
-    this._setCards(movies);
-
-    this._films.getElement().classList.remove(`visually-hidden`);
-    this._sort.getElement().classList.remove(`visually-hidden`);
-    this._navigation.getElement().classList.remove(`visually-hidden`);
-  }
-
   hide() {
     this._films.getElement().classList.add(`visually-hidden`);
     this._sort.getElement().classList.add(`visually-hidden`);
     this._navigation.getElement().classList.add(`visually-hidden`);
     this._statisticController.hide();
-  }
-
-  _setCards(cardsArr) {
-    if (!this._filteredMovies) {
-      this._cardsArr = cardsArr;
-    }
-
-    const cardsList = this._filteredMovies ? this._filteredMovies : this._cardsArr.slice();
-
-    const body = document.querySelector(`body`);
-    this._filmsListContainer.getElement().innerHTML = ``;
-    const movitListConrtroller = new MovitListConrtroller(this._filmsListContainer.getElement(), this._onDataChange, this._onChangeView);
-
-    if (this._cardsArr.length < 1) {
-      body.innerText = `There are no movies in our database`;
-    } else {
-      movitListConrtroller.init(cardsList);
-      this._unrenderedCards = cardsList;
-    }
-    this._showMoreBtn.getElement().addEventListener(`click`, () => {
-      if (this._unrenderedCards.length > 0) {
-        movitListConrtroller.init(this._unrenderedCards);
-      }
-      if (this._unrenderedCards.length < 1) {
-        unrender(this._showMoreBtn.getElement());
-      }
-    });
   }
 
   _onSortClick(evt) {
@@ -99,20 +110,19 @@ export default class PageController {
 
     document.querySelector(`.sort__button--active`).classList.remove(`sort__button--active`);
     evt.target.classList.add(`sort__button--active`);
-    this._filmsListContainer.getElement().innerHTML = ``;
 
     switch (evt.target.dataset.sortType) {
       case `date`:
         const sortByDate = this._cardsArr.slice().sort((a, b) => a.date - b.date);
-        this._setCards(sortByDate);
+        this._movitListConrtroller.___setCards(sortByDate);
         break;
       case `rating`:
         const sortByRating = this._cardsArr.slice().sort((a, b) => a.total_rating - b.total_rating);
-        this._setCards(sortByRating);
+        this._movitListConrtroller.___setCards(sortByRating);
         break;
       case `default`:
         const sortByDefault = this._cardsArr.slice().sort((a, b) => a.id - b.id);
-        this._setCards(sortByDefault);
+        this._movitListConrtroller.___setCards(sortByDefault);
         break;
     }
   }
@@ -176,23 +186,10 @@ export default class PageController {
 
   _onDataChange(newData) {
 
-    if (this._filteredMovies) {
-      this._filteredMovies = newData;
-    } else {
-      this._cardsArr = newData;
-    }
+    // Переписываем видимую часть тасков
+    this._cardsArr = [...newData, ...this._cardsArr.slice(this._showedMovies)];
 
-    const userRang = document.querySelector(`.profile__rating`);
-    unrender(this._filmsListContainer.getElement());
-    this._filmsListContainer.removeElement();
-
-    render(this._filmsList. getElement(), this._filmsListContainer.getElement(), Position.BEFOREEND);
-    this._setCards(newData);
-    this._unrenderedCards = newData;
-
-    this._userData.update(this._cardsArr);
-    this._updateNavigation();
-    userRang.innerHTML = this._userData.rank;
+    this.___renderPage();
   }
 
   _onChangeView() {

@@ -20,6 +20,8 @@ export default class ShowMoreBtn extends AbstractComponent {
     this._isWatched = user.isWatched;
     this._inWatchList = user.inWatchList;
     this._isFavorite = user.isFavorite;
+
+    this._onControlClick();
   }
 
   createComment(comment) {
@@ -36,6 +38,16 @@ export default class ShowMoreBtn extends AbstractComponent {
               </p>
             </div>
           </li>`;
+  }
+
+  _onControlClick() {
+    this.getElement().querySelector(`#watched`).addEventListener(`change`, (evt) => {
+      evt.preventDefault();
+
+      if (evt.target.id === `watched`) {
+        this.getElement().querySelector(`.form-details__middle-container`).classList.toggle(`visually-hidden`);
+      }
+    });
   }
 
   getTemplate() {
