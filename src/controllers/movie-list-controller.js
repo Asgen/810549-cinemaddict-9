@@ -54,7 +54,7 @@ export default class MovitListConrtroller {
       }
     }
 
-    this._onDataChangeMain(this._cardsArr);
+    this._onDataChangeMain(this._cardsArr, thisCard);
   }
 
   _onChangeView() {

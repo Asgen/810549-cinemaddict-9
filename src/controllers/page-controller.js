@@ -1,15 +1,15 @@
+import UserData from '../data/user-data.js';
 import {render, unrender, Position, SortBy} from '../utils.js';
 import Navigation from '../components/navigation.js';
 import Films from '../components/films.js';
 import ShowMoreBtn from '../components/show-more-button.js';
 import Sort from '../components/sort.js';
 import FilmsList from '../components/films-list.js';
-import FilmsListExtra from '../components/films-list-extra.js';
-import FilmsListExtraTitle from '../components/films-list-extra-title.js';
 import FilmsContainer from '../components/films-container.js';
+
 import MovitListConrtroller from '../controllers/movie-list-controller.js';
 import StatisticConrtoller from '../controllers/statistic-controller.js';
-import UserData from '../data/user-data.js';
+import ExtraMoviesController from '../controllers/extra-movies-controller.js';
 
 const CARDS_IN_ROW = 5;
 
@@ -23,8 +23,6 @@ export default class PageController {
     this._showMoreBtn = new ShowMoreBtn();
     this._films = new Films();
     this._filmsList = new FilmsList();
-    this._filmsListExtra = new FilmsListExtra();
-    this._filmsListExtraTitle = new FilmsListExtraTitle();
     this._filmsListContainer = new FilmsContainer();
     this._sort = new Sort();
     this._unrenderedCards = 0;
@@ -35,6 +33,7 @@ export default class PageController {
 
     this._subscriptions = [];
 
+    this._extraMoviesController = new ExtraMoviesController(this._films.getElement(), this._onExtraDataChange.bind(this));
     this._movitListConrtroller = new MovitListConrtroller(this._filmsListContainer.getElement(), this._onDataChange.bind(this));
     this._statisticController = new StatisticConrtoller(this._container);
 
@@ -70,6 +69,7 @@ export default class PageController {
     }
 
     this._movitListConrtroller.setCards(movies.slice(0, this._showedMovies));
+    this._extraMoviesController.render(this._cardsArr);
 
     this._showMoreBtn.getElement()
       .addEventListener(`click`, () => this._onLoadMoreButtonClick());
@@ -107,7 +107,6 @@ export default class PageController {
     this._films.getElement().classList.remove(`visually-hidden`);
     this._sort.getElement().classList.remove(`visually-hidden`);
     this._navigation.getElement().classList.remove(`visually-hidden`);
-    this._renderExtraBlocks(this._cardsArr);
   }
 
   update(movies) {
@@ -195,7 +194,7 @@ export default class PageController {
       case (`stats`):
         this.hide();
         this._navigation.getElement().classList.remove(`visually-hidden`);
-        this._statisticController.show(this._userData.watchedFilms,this._userData.rank);
+        this._statisticController.show(this._userData.watchedFilms, this._userData.rank);
         break;
     }
   }
@@ -219,25 +218,6 @@ export default class PageController {
     this._navigation.getElement().addEventListener(`click`, (evt) => this._onNavigationClick(evt));
   }
 
-  _renderExtraBlocks(allMovies) {
-    const topRatedMovies = this._sortMoviesList(allMovies, SortBy.RATING).slice(0, 2);
-    if (topRatedMovies[0].total_rating === 0) {
-      return;
-    }
-    const mostCommented = allMovies.slice().sort((a, b) => a.comments.length - b.comments.length).slice(0, 2);
-
-    const filmsContainer = new FilmsContainer();
-    render(this._films.getElement(), this._filmsListExtra.getElement(), Position.BEFOREEND);
-     render(this._films.getElement(), this._filmsListExtra.getElement(), Position.BEFOREEND);
-    render(this._filmsListExtra.getElement(), this._filmsListExtraTitle.getElement(), Position.AFTERBEGIN);
-    render(this._filmsListExtra.getElement(), filmsContainer.getElement(), Position.BEFOREEND);
-
-
-    const movitListConrtrollerX = new MovitListConrtroller(filmsContainer.getElement(), this._onDataChange.bind(this));
-    movitListConrtrollerX.setCards(topRatedMovies);
-
-  }
-
   _onDataChange(newData) {
 
     // Переписываем видимую часть тасков
@@ -250,10 +230,13 @@ export default class PageController {
     this.update(this._cardsArr);
     this._renderPage();
     this._onDataChangeMain(this._userData.watchedFilms.length);
-    //this._renderExtraBlocks(this._cardsArr);
   }
 
-  _onChangeView() {
-    this._subscriptions.forEach((subscription) => subscription());
+  _onExtraDataChange(editedCard) {
+    this._cardsArr[this._cardsArr.findIndex((it) => it === editedCard)] = editedCard;
+
+    this.update(this._cardsArr);
+    this._setCards(this._cardsArr);
+    this._onDataChangeMain(this._userData.watchedFilms.length);
   }
 }
