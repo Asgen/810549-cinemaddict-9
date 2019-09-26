@@ -1,4 +1,4 @@
-const CARDS_AMOUNT = 12;
+const CARDS_AMOUNT = 25;
 
 const getGanre = () => ([
   `Thriller`,

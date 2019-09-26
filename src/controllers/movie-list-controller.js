@@ -1,6 +1,3 @@
-//import {render, unrender, Position} from '../utils.js';
-
-//import ShowMoreBtn from '../components/show-more-button.js';
 import MovieController from '../controllers/movie-controller.js';
 
 export default class MovitListConrtroller {
@@ -8,7 +5,6 @@ export default class MovitListConrtroller {
     this._cardsArr = [];
     this._container = container;
     this._onDataChangeMain = onDataChange;
-    //this._showMoreBtn = new ShowMoreBtn();
     this._unrenderedCards = 0;
 
     this._subscriptions = [];
@@ -16,7 +12,7 @@ export default class MovitListConrtroller {
     this._onChangeView = this._onChangeView.bind(this);
   }
 
-  _setCards(cards) {
+  setCards(cards) {
     this._cardsArr = cards;
     this._subscriptions = [];
 

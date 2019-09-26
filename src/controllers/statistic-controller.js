@@ -13,6 +13,7 @@ import UserData from '../data/user-data.js';
 export default class StatisticController {
   constructor(container) {
     this._container = container;
+    this._rank = ``;
     this._cards = [];
     this._userData = new UserData();
 
@@ -29,29 +30,11 @@ export default class StatisticController {
   }
 
   _render() {
-    let rate = this._userData.watchedFilms.length;
-
-    switch (true) {
-      case (rate < 1):
-        rate = ``;
-        break;
-      case (rate > 0 && rate < 11):
-        rate = `Novice`;
-        break;
-      case (rate > 10 && rate < 21):
-        rate = `Fan`;
-        break;
-      case (rate > 20):
-        rate = `Movie Buff`;
-        break;
-    }
-
-
     unrender(this._statistic.getElement().querySelector(`.statistic__rank`));
     unrender(this._statistic.getElement().querySelector(`.statistic__text-list`));
     unrender(this._statistic.getElement().querySelector(`.statistic__chart-wrap`));
 
-    render(this._statistic.getElement(), new StatisticRank(rate).getElement(), Position.AFTERBEGIN);
+    render(this._statistic.getElement(), new StatisticRank(this._rank).getElement(), Position.AFTERBEGIN);
     render(this._statistic.getElement(), new StatisticInfo(this._userData.countActivity()).getElement(), Position.BEFOREEND);
     render(this._statistic.getElement(), new StatisticCanvas().getElement(), Position.BEFOREEND);
     const daysCtx = document.querySelector(`.statistic__chart`);
@@ -91,8 +74,9 @@ export default class StatisticController {
     }
   }
 
-  show(cards) {
+  show(cards, rank) {
     this._cards = cards;
+    this._rank = rank;
     this._userData.update(cards);
     this._render();
     this._statistic.getElement().classList.remove(`visually-hidden`);

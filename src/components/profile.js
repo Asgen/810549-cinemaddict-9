@@ -25,6 +25,10 @@ export default class Profile extends AbstractComponent {
     }
   }
 
+  update(watchlistLength) {
+    this._watchlistLength = watchlistLength;
+    this._init();
+  }
 
   getTemplate() {
     return `<section class="header__profile profile">
