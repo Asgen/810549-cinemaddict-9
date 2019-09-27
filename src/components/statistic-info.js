@@ -1,12 +1,10 @@
 import AbstractComponent from '../components/AbstractComponent.js';
 
 export default class StatisticInfo extends AbstractComponent {
-  constructor({history, topGenre}) {
+  constructor({watchedFilms, topGenre, totalDuration}) {
     super();
-    this._watched = history.length;
-    this._duration = history.reduce((previousValue, currentValue) => {
-      return previousValue + currentValue.duration;
-    }, 0);
+    this._watched = watchedFilms;
+    this._duration = totalDuration;
     this._genre = topGenre;
   }
   getTemplate() {
@@ -21,7 +19,7 @@ export default class StatisticInfo extends AbstractComponent {
       </li>
       <li class="statistic__text-item">
         <h4 class="statistic__item-title">Top genre</h4>
-        <p class="statistic__item-text">${this._genre}</p>
+        <p class="statistic__item-text">${this._genre ? this._genre : `-`}</p>
       </li>
     </ul>`;
   }

@@ -3,6 +3,12 @@ const Position = {
   BEFOREEND: `beforeend`
 };
 
+const SortBy = {
+  DATE: `date`,
+  RATING: `rating`,
+  DEFAULT: `default`
+};
+
 const createElement = (tempalete) => {
   const element = document.createElement(`div`);
   element.innerHTML = tempalete;
@@ -27,4 +33,4 @@ const unrender = (element) => {
   }
 };
 
-export {createElement, render, unrender, Position};
+export {createElement, render, unrender, Position, SortBy};

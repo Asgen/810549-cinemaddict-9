@@ -1,10 +1,35 @@
 import AbstractComponent from '../components/AbstractComponent.js';
 
 export default class Profile extends AbstractComponent {
-  constructor({rating}) {
+  constructor(watchlistLength) {
     super();
-    this._rating = rating;
+    this._watchlistLength = watchlistLength;
+    this._rating = ``;
+    this._init();
   }
+
+  _init() {
+    switch (true) {
+      case (this._watchlistLength < 1):
+        this._rating = ``;
+        break;
+      case (this._watchlistLength > 0 && this._watchlistLength < 11):
+        this._rating = `Novice`;
+        break;
+      case (this._watchlistLength > 10 && this._watchlistLength < 21):
+        this._rating = `Fan`;
+        break;
+      case (this._watchlistLength > 20):
+        this._rating = `Movie Buff`;
+        break;
+    }
+  }
+
+  update(watchlistLength) {
+    this._watchlistLength = watchlistLength;
+    this._init();
+  }
+
   getTemplate() {
     return `<section class="header__profile profile">
     <p class="profile__rating">${this._rating}</p>

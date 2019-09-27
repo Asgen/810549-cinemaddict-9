@@ -2,7 +2,7 @@ import moment from 'moment';
 import AbstractComponent from '../components/AbstractComponent.js';
 
 export default class ShowMoreBtn extends AbstractComponent {
-  constructor({title, description, director, writers, actors, duration, country, poster, date, genre, rate, age, comments, isWatched, inWatchList, isFavorite}) {
+  constructor({title, description, director, writers, actors, duration, country, poster, date, genre, total_rating: totalRate, age_rating: ageRate, comments, user_details: user}) {
     super();
     this._title = title;
     this._description = description;
@@ -14,12 +14,12 @@ export default class ShowMoreBtn extends AbstractComponent {
     this._poster = poster;
     this._date = date;
     this._genre = genre;
-    this._rate = rate;
-    this._age = age;
+    this._rate = totalRate;
+    this._age = ageRate;
     this._comments = comments;
-    this._isWatched = isWatched;
-    this._inWatchList = inWatchList;
-    this._isFavorite = isFavorite;
+    this._isWatched = user.isWatched;
+    this._inWatchList = user.inWatchList;
+    this._isFavorite = user.isFavorite;
 
     this._onControlClick();
   }
@@ -127,7 +127,7 @@ export default class ShowMoreBtn extends AbstractComponent {
         <label for="favorite" class="film-details__control-label film-details__control-label--favorite">Add to favorites</label>
       </section>
     </div>
-    
+
     <div class="form-details__middle-container ${this._isWatched ? `` : `visually-hidden`}">
       <section class="film-details__user-rating-wrap">
         <div class="film-details__user-rating-controls">

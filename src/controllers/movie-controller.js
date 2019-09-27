@@ -19,6 +19,10 @@ export default class MovieController {
 
     const onCardClick = () => {
 
+      if (document.body.contains(document.querySelector(`.film-details`))) {
+        return;
+      }
+
       const onEscKeyDown = (evt) => {
         if (evt.key === `Escape` || evt.key === `Esc`) {
           this.setDefaultView();

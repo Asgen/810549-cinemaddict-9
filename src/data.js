@@ -1,4 +1,4 @@
-const CARDS_AMOUNT = 12;
+const CARDS_AMOUNT = 5;
 
 const getGanre = () => ([
   `Thriller`,
@@ -27,8 +27,8 @@ const makeComment = () => ({
 });
 
 const makeCard = () => ({
-  id: Math.floor(Math.random() * 50000000),
-  title: [
+  "id": Math.floor(Math.random() * 50000000),
+  "title": [
     `My Best Friend's Birthday`,
     `Pulp Fiction`,
     `Reservoir Dogs`,
@@ -45,7 +45,7 @@ const makeCard = () => ({
     `Once Upon a Time in Holywood`,
     `Thursday`
   ][Math.floor(Math.random() * 15)],
-  description: [`Lorem ipsum okk sit amet, consectetur adipiscing elit.`,
+  "description": [`Lorem ipsum okk sit amet, consectetur adipiscing elit.`,
     `Cras aliquet varius magna, non porta ligula feugiat eget.`,
     `Fusce tristique okk at fermentum pharetra.`,
     `Aliquam id orci ut lectus varius viverra.`,
@@ -55,19 +55,25 @@ const makeCard = () => ({
     `Sed sed nisi sed augue convallis suscipit in sed felis.`,
     `Aliquam erat volutpat. Nunc fermentum tortor ac porta dapibus.`,
     `In rutrum ac purus sit amet tempus.`].slice(Math.floor(Math.random() * 7 - 3)).join(` `),
-  poster: [
+  "poster": [
     `/images/posters/the-dance-of-life.jpg`,
     `/images/posters/popeye-meets-sinbad.png`,
     `/images/posters/made-for-each-other.png`,
     `/images/posters/pulp-fiction.jpg`,
     `/images/posters/sin-city.jpg`
   ][Math.floor(Math.random() * 5)],
-  director: `Quentin Tarantino`,
-  writers: new Set([
+  "director": `Quentin Tarantino`,
+  "writers": new Set([
     `Quentin Tarantino`,
     `Robert Anthony Rodriguez`
   ]),
-  actors: new Set([
+  "age_rating": 18,
+  "total_rating": [
+    7.7,
+    8.1,
+    4.5
+  ][Math.floor(Math.random() * 3)],
+  "actors": new Set([
     `Tim Roth`,
     `John Travolta`,
     `Brad Pitt`,
@@ -75,58 +81,35 @@ const makeCard = () => ({
     `Bridget Fonda`,
     `Margot Robbie`
   ]),
-  date: Date.now() + 1 + Math.floor((Math.random() * 15000) - 14999) * 24 * 60 * 60 * 1000,
-  duration: [
+  "date": Date.now() + 1 + Math.floor((Math.random() * 15000) - 14999) * 24 * 60 * 60 * 1000,
+  "duration": [
     77,
     80,
     110
   ][Math.floor(Math.random() * 3)],
-  country: `USA`,
-  genre: new Set([getGanre(), getGanre()]),
-  rate: [
-    8.9,
-    4.5,
-    9.1,
-    8.3
-  ][Math.floor(Math.random() * 4)],
-  age: 18,
-  isFavorite: Boolean(Math.round(Math.random())),
-  isWatched: Boolean(Math.round(Math.random())),
-  inWatchList: Boolean(Math.round(Math.random())),
-  comments: Array.from(Array(Math.floor(Math.random() * 5))).map(makeComment),
+  "country": `USA`,
+  "genre": new Set([getGanre(), getGanre()]),
+  "user_details": {
+    "personal_rating": [
+      8.9,
+      4.5,
+      9.1,
+      8.3
+    ][Math.floor(Math.random() * 4)],
+    "isFavorite": Boolean(Math.round(Math.random())),
+    "isWatched": Boolean(Math.round(Math.random())),
+    "inWatchList": Boolean(Math.round(Math.random())),
+    "watching_date": [
+      `2019-09-21T16:12:32.554Z`,
+      `2019-09-28T16:12:32.554Z`,
+      `2019-09-20T16:12:32.554Z`,
+      `2019-09-19T16:12:32.554Z`
+    ][Math.floor(Math.random() * 4)],
+  },
+  "comments": Array.from(Array(Math.floor(Math.random() * 5))).map(makeComment),
 });
 
 const cardsList = Array.from(Array(CARDS_AMOUNT))
   .map(makeCard).sort((a, b) => a.id - b.id);
 
-const user = {
-  rating: [
-    `Novice`,
-    `Fan`,
-    `Movie Buff`
-  ][Math.floor(Math.random() * 3)],
-  watchlist: cardsList.filter((card) => card.inWatchList).length,
-  history: cardsList.filter((card) => card.isWatched),
-  favorites: cardsList.filter((card) => card.isFavorite),
-};
-
-const allGenres = user.favorites
-  .reduce((prev, curr) => {
-    return [...prev, ...curr.genre];
-  }, [])
-  .reduce((acc, el) => {
-    acc[el] = (acc[el] || 0) + 1;
-    return acc;
-  }, {});
-
-let bestGanre = 0;
-
-for (let key in allGenres) {
-  if (allGenres[key] > bestGanre) {
-    bestGanre = key;
-  }
-}
-
-user.topGenre = bestGanre;
-
-export {cardsList, makeCard, user};
+export {cardsList, makeCard};
