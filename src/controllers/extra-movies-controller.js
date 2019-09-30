@@ -52,7 +52,7 @@ export default class ExtraMoviesController {
 
     switch (mode) {
       case (Title.RATE):
-        topMovies = this._movies.sort((a, b) => b.total_rating - a.total_rating).slice(0, 2);
+        topMovies = this._movies.sort((a, b) => b.totalRating - a.totalRating).slice(0, 2);
         break;
       case (Title.COMMENT):
         topMovies = this._movies.sort((a, b) => b.comments.length - a.comments.length).slice(0, 2);

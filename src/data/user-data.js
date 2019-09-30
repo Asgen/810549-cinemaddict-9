@@ -10,9 +10,9 @@ export default class UserData {
   }
 
   update(cards) {
-    this.watchList = cards.filter((card) => card.user_details.inWatchList);
-    this.watchedFilms = cards.filter((card) => card.user_details.isWatched);
-    this.favorites = cards.filter((card) => card.user_details.isFavorite);
+    this.watchList = cards.filter((card) => card.userDetails.inWatchList);
+    this.watchedFilms = cards.filter((card) => card.userDetails.isWatched);
+    this.favorites = cards.filter((card) => card.userDetails.isFavorite);
     this.rate = this.watchedFilms.length;
     this.totalDuration = this.watchedFilms.reduce((previousValue, currentValue) => {
       return previousValue + currentValue.duration;

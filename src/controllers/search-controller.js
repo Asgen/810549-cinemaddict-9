@@ -81,12 +81,12 @@ export default class SearchController {
       if (this._filmsList.getElement().contains(this._noResult.getElement())) {
         unrender(this._noResult.getElement());
       }
-      movitListConrtroller.init(cardsList);
+      movitListConrtroller.setCards(cardsList);
       this._unrenderedCards = cardsList;
     }
     this._showMoreBtn.getElement().addEventListener(`click`, () => {
       if (this._unrenderedCards.length > 0) {
-        movitListConrtroller.init(this._unrenderedCards);
+        movitListConrtroller.setCards(this._unrenderedCards);
       }
       if (this._unrenderedCards.length < 1) {
         unrender(this._showMoreBtn.getElement());

@@ -1,9 +1,17 @@
 import {render, createElement, unrender, Position} from '../utils.js';
 
+import API from '../api.js';
+
 import Card from '../components/card.js';
 import Detail from '../components/detail.js';
+
+
+
+
+
 export default class MovieController {
-  constructor(container, data, onDataChange, onChangeView) {
+  constructor(container, data, onDataChange, onChangeView, auth) {
+    this._auth = auth;
     this._container = container;
     this._data = data;
     this._card = new Card(data);
@@ -18,6 +26,11 @@ export default class MovieController {
     const body = document.querySelector(`body`);
 
     const onCardClick = () => {
+
+      const END_POINT = `https://htmlacademy-es-9.appspot.com/cinemaddict`;
+      const api = new API({endPoint: END_POINT, authorization: this._auth});
+
+      api.getComments(this._data.id).then((comments) => console.log(comments));
 
       if (document.body.contains(document.querySelector(`.film-details`))) {
         return;

@@ -1,9 +1,10 @@
 import moment from 'moment';
 import AbstractComponent from '../components/AbstractComponent.js';
 
-export default class ShowMoreBtn extends AbstractComponent {
-  constructor({title, description, director, writers, actors, duration, country, poster, date, genre, total_rating: totalRate, age_rating: ageRate, comments, user_details: user}) {
+export default class Detail extends AbstractComponent {
+  constructor({id, title, description, director, writers, actors, duration, country, poster, date, genre, totalRating, ageRating, comments, userDetails}) {
     super();
+    this._id = id;
     this._title = title;
     this._description = description;
     this._director = director;
@@ -14,12 +15,12 @@ export default class ShowMoreBtn extends AbstractComponent {
     this._poster = poster;
     this._date = date;
     this._genre = genre;
-    this._rate = totalRate;
-    this._age = ageRate;
+    this._rate = totalRating;
+    this._age = ageRating;
     this._comments = comments;
-    this._isWatched = user.isWatched;
-    this._inWatchList = user.inWatchList;
-    this._isFavorite = user.isFavorite;
+    this._isWatched = userDetails.isWatched;
+    this._inWatchList = userDetails.inWatchList;
+    this._isFavorite = userDetails.isFavorite;
 
     this._onControlClick();
   }
@@ -95,7 +96,7 @@ export default class ShowMoreBtn extends AbstractComponent {
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Runtime</td>
-              <td class="film-details__cell">${this._duration}</td>
+              <td class="film-details__cell">${Math.floor(this._duration / 60)}h ${this._duration % 60}m</td>
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Country</td>

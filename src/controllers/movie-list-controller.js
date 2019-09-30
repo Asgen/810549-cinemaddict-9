@@ -1,7 +1,8 @@
 import MovieController from '../controllers/movie-controller.js';
 
 export default class MovitListConrtroller {
-  constructor(container, onDataChange) {
+  constructor(container, onDataChange, auth) {
+    this._auth = auth;
     this._cardsArr = [];
     this._container = container;
     this._onDataChangeMain = onDataChange;
@@ -26,7 +27,7 @@ export default class MovitListConrtroller {
   }
 
   _renderCard(card) {
-    const movieController = new MovieController(this._container, card, this._onDataChange, this._onChangeView);
+    const movieController = new MovieController(this._container, card, this._onDataChange, this._onChangeView, this._auth);
     this._subscriptions.push(movieController.setDefaultView.bind(movieController));
   }
 
@@ -40,16 +41,16 @@ export default class MovitListConrtroller {
       switch (newData) {
 
         case (`watchlist`):
-          thisCard.user_details.inWatchList = !thisCard.user_details.inWatchList ? true : false;
+          thisCard.userDetails.inWatchList = !thisCard.userDetails.inWatchList ? true : false;
           break;
         case (`watched`):
-          thisCard.user_details.isWatched = !thisCard.user_details.isWatched ? true : false;
-          if (thisCard.user_details.isWatched) {
-            thisCard.user_details[`watching_date`] = new Date().toISOString();
+          thisCard.userDetails.isWatched = !thisCard.userDetails.isWatched ? true : false;
+          if (thisCard.userDetails.isWatched) {
+            thisCard.userDetails.watchingDate = new Date().toISOString();
           }
           break;
         case (`favorite`):
-          thisCard.user_details.isFavorite = thisCard.user_details.isFavorite !== true ? true : false;
+          thisCard.userDetails.isFavorite = thisCard.userDetails.isFavorite !== true ? true : false;
           break;
       }
     }

@@ -14,7 +14,8 @@ import ExtraMoviesController from '../controllers/extra-movies-controller.js';
 const CARDS_IN_ROW = 5;
 
 export default class PageController {
-  constructor(container, onDataChange) {
+  constructor(container, onDataChange, AUTHORIZATION) {
+    this._auth = AUTHORIZATION;
     this._onDataChangeMain = onDataChange;
     this._cardsArr = [];
     this._container = container;
@@ -34,7 +35,7 @@ export default class PageController {
     this._subscriptions = [];
 
     this._extraMoviesController = new ExtraMoviesController(this._films.getElement(), this._onExtraDataChange.bind(this));
-    this._movitListConrtroller = new MovitListConrtroller(this._filmsListContainer.getElement(), this._onDataChange.bind(this));
+    this._movitListConrtroller = new MovitListConrtroller(this._filmsListContainer.getElement(), this._onDataChange.bind(this), this._auth);
     this._statisticController = new StatisticConrtoller(this._container);
 
     this._init();
@@ -153,7 +154,7 @@ export default class PageController {
         sortedArr.sort((a, b) => b.date - a.date);
         break;
       case SortBy.RATING:
-        sortedArr.sort((a, b) => b.total_rating - a.total_rating);
+        sortedArr.sort((a, b) => b.totalRating - a.totalRating);
         break;
       case SortBy.DEFAULT:
         sortedArr.sort((a, b) => a.id - b.id);
@@ -177,17 +178,17 @@ export default class PageController {
         this._statisticController.hide();
         break;
       case (`watchlist`):
-        this._filteredMovies = this._cardsArr.filter((it) => it.user_details.inWatchList === true);
+        this._filteredMovies = this._cardsArr.filter((it) => it.userDetails.inWatchList === true);
         this.show(this._filteredMovies);
         this._statisticController.hide();
         break;
       case (`history`):
-        this._filteredMovies = this._cardsArr.filter((it) => it.user_details.isWatched === true);
+        this._filteredMovies = this._cardsArr.filter((it) => it.userDetails.isWatched === true);
         this.show(this._filteredMovies);
         this._statisticController.hide();
         break;
       case (`favorites`):
-        this._filteredMovies = this._cardsArr.filter((it) => it.user_details.isFavorite === true);
+        this._filteredMovies = this._cardsArr.filter((it) => it.userDetails.isFavorite === true);
         this.show(this._filteredMovies);
         this._statisticController.hide();
         break;

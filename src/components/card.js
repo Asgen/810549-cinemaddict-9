@@ -2,7 +2,7 @@ import moment from 'moment';
 import AbstractComponent from '../components/AbstractComponent.js';
 
 class Card extends AbstractComponent {
-  constructor({title, description, duration, poster, date, genre, total_rating: totalRate, user_details: user, comments}) {
+  constructor({title, description, duration, poster, date, genre, totalRating, userDetails, comments}) {
     super();
     this._title = title;
     this._description = description;
@@ -10,11 +10,11 @@ class Card extends AbstractComponent {
     this._poster = poster;
     this._date = date;
     this._genre = genre;
-    this._rate = totalRate;
+    this._rate = totalRating;
     this._comments = comments;
-    this._isWatched = user.isWatched;
-    this._inWatchList = user.inWatchList;
-    this._isFavorite = user.isFavorite;
+    this._isWatched = userDetails.isWatched;
+    this._inWatchList = userDetails.inWatchList;
+    this._isFavorite = userDetails.isFavorite;
   }
 
   getTemplate() {
