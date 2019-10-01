@@ -1,84 +1,40 @@
 import {render, createElement, unrender, Position} from '../utils.js';
-
-import API from '../api.js';
-
 import Card from '../components/card.js';
 import Detail from '../components/detail.js';
 
 
-
-
-
 export default class MovieController {
-  constructor(container, data, onDataChange, onChangeView, auth) {
-    this._auth = auth;
+  constructor(container, data, onDataChange, onChangeView, api) {
+    //this._auth = auth;
     this._container = container;
     this._data = data;
     this._card = new Card(data);
-    this._detail = new Detail(data);
+    this._detail = null;
     this._onDataChange = onDataChange;
     this._onChangeView = onChangeView;
+
+    this._api = api;
 
     this.init();
   }
 
-  init() {
+  _renderPopup(comments) {
+
     const body = document.querySelector(`body`);
+    this._detail = new Detail(this._data, comments);
+    render(body, this._detail.getElement(), Position.BEFOREEND);
 
-    const onCardClick = () => {
+    document.addEventListener(`keydown`, (e) => this._onEscKeyDown(e));
 
-      const END_POINT = `https://htmlacademy-es-9.appspot.com/cinemaddict`;
-      const api = new API({endPoint: END_POINT, authorization: this._auth});
-
-      api.getComments(this._data.id).then((comments) => console.log(comments));
-
-      if (document.body.contains(document.querySelector(`.film-details`))) {
-        return;
-      }
-
-      const onEscKeyDown = (evt) => {
-        if (evt.key === `Escape` || evt.key === `Esc`) {
-          this.setDefaultView();
-        }
-      };
-
-      this._detail.getElement()
+    this._detail.getElement()
         .querySelector(`.film-details__close-btn`)
-        .addEventListener(`click`, () => {
-          this.setDefaultView();
-        });
+        .addEventListener(`click`, this.setDefaultView.bind(this));
 
-      this._detail.getElement()
+    this._detail.getElement()
         .querySelector(`textarea`)
         .addEventListener(`focus`, () => {
-          document.removeEventListener(`keydown`, onEscKeyDown);
+          document.removeEventListener(`keydown`, this._onEscKeyDown);
         });
-
-      document.addEventListener(`keydown`, onEscKeyDown);
-
-      this._onChangeView();
-
-      render(body, this._detail.getElement(), Position.BEFOREEND);
-    };
-
-    // Обработка нажатий на контроль фильма
-    for (let control of this._card.getElement().querySelectorAll(`.film-card__controls-item`)) {
-      control.addEventListener(`click`, (evt) => {
-        evt.preventDefault();
-        evt.target.classList.toggle(`film-card__controls-item--active`);
-        switch (evt.target.dataset.controlType) {
-          case (`watchlist`):
-            this._onDataChange(this._data, `watchlist`);
-            break;
-          case (`watched`):
-            this._onDataChange(this._data, `watched`);
-            break;
-          case (`favorite`):
-            this._onDataChange(this._data, `favorite`);
-            break;
-        }
-      });
-    }
 
     // Обработка нажатий на контроль фильма в детальном просмотре
     for (let control of this._detail.getElement().querySelectorAll(`.film-details__control-input`)) {
@@ -98,7 +54,6 @@ export default class MovieController {
       });
     }
 
-
     // Удаление комментария
     this._detail.getElement().querySelector(`.film-details__comments-wrap`)
       .addEventListener(`click`, (evt) => {
@@ -117,13 +72,7 @@ export default class MovieController {
             }
           });
 
-        this._data.comments.forEach((it, index) => {
-          if (it.id === commentId) {
-            this._data.comments.splice(index, 1);
-          }
-        });
-
-        this._onDataChange(this._data, null);
+        this._api.deleteComment(commentId).then(() => this._onDataChange(this._data, null));
       });
 
     // Добавление комментария
@@ -136,19 +85,15 @@ export default class MovieController {
       if (evt.key === `Enter` && evt.ctrlKey && commentInput.value && emojiContainer.querySelector(`img`)) {
 
         const newComment = {
-          id: Math.floor(Math.random() * 5000000000),
-          commentator: `John Doe`,
-          comment: commentInput.value.replace(/[^а-яёa-z0-9\s\.]/gmi, ` `),
-          reaction: this._detail.getElement().querySelector(`input[name="comment-emoji"]:checked`).value,
-          commentDate: Date.now(),
+          'comment': commentInput.value.replace(/[^а-яёa-z0-9\s\.]/gmi, ` `),
+          'emotion': this._detail.getElement().querySelector(`input[name="comment-emoji"]:checked`).value,
+          'date': new Date().toISOString(),
         };
 
-        this._data.comments.push(newComment);
+        const commentDOM = createElement(this._detail.createComment(newComment));
+        render(this._detail.getElement().querySelector(`.film-details__comments-list`), commentDOM, Position.BEFOREEND);
 
-        const comment = createElement(this._detail.createComment(newComment));
-        render(this._detail.getElement().querySelector(`.film-details__comments-list`), comment, Position.BEFOREEND);
-
-        this._onDataChange(this._data, null);
+        this._api.createComment(this._data.id, newComment).then(() => this._onDataChange(this._data, null));
 
         let checkedInput = this._detail.getElement().querySelector(`INPUT[name="comment-emoji"]:checked`);
         emojiContainer.innerHTML = ``;
@@ -180,9 +125,48 @@ export default class MovieController {
       });
     }
 
-    this._card.getElement().querySelector(`.film-card__title`).addEventListener(`click`, () => onCardClick(this._data));
-    this._card.getElement().querySelector(`.film-card__comments`).addEventListener(`click`, () => onCardClick(this._data));
-    this._card.getElement().querySelector(`.film-card__poster`).addEventListener(`click`, () => onCardClick(this._data));
+    this._onChangeView.bind(this);
+  }
+
+  _onEscKeyDown(evt) {
+    if (evt.key === `Escape` || evt.key === `Esc`) {
+      this.setDefaultView();
+    }
+  }
+
+  init() {
+
+    const onCardClick = () => {
+
+      if (document.body.contains(document.querySelector(`.film-details`))) {
+        return;
+      }
+
+      this._api.getComments(this._data.id).then((comments) => this._renderPopup(comments));
+    };
+
+    // Обработка нажатий на контроль фильма
+    for (let control of this._card.getElement().querySelectorAll(`.film-card__controls-item`)) {
+      control.addEventListener(`click`, (evt) => {
+        evt.preventDefault();
+        evt.target.classList.toggle(`film-card__controls-item--active`);
+        switch (evt.target.dataset.controlType) {
+          case (`watchlist`):
+            this._onDataChange(this._data, `watchlist`);
+            break;
+          case (`watched`):
+            this._onDataChange(this._data, `watched`);
+            break;
+          case (`favorite`):
+            this._onDataChange(this._data, `favorite`);
+            break;
+        }
+      });
+    }
+
+    this._card.getElement().querySelector(`.film-card__title`).addEventListener(`click`, onCardClick);
+    this._card.getElement().querySelector(`.film-card__comments`).addEventListener(`click`, onCardClick);
+    this._card.getElement().querySelector(`.film-card__poster`).addEventListener(`click`, onCardClick);
 
     render(this._container, this._card.getElement(), Position.BEFOREEND);
   }

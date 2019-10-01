@@ -14,8 +14,8 @@ import ExtraMoviesController from '../controllers/extra-movies-controller.js';
 const CARDS_IN_ROW = 5;
 
 export default class PageController {
-  constructor(container, onDataChange, AUTHORIZATION) {
-    this._auth = AUTHORIZATION;
+  constructor(container, onDataChange, api) {
+    this._api = api;
     this._onDataChangeMain = onDataChange;
     this._cardsArr = [];
     this._container = container;
@@ -35,7 +35,7 @@ export default class PageController {
     this._subscriptions = [];
 
     this._extraMoviesController = new ExtraMoviesController(this._films.getElement(), this._onExtraDataChange.bind(this));
-    this._movitListConrtroller = new MovitListConrtroller(this._filmsListContainer.getElement(), this._onDataChange.bind(this), this._auth);
+    this._movitListConrtroller = new MovitListConrtroller(this._filmsListContainer.getElement(), this._onDataChange.bind(this), this._api);
     this._statisticController = new StatisticConrtoller(this._container);
 
     this._init();
@@ -151,7 +151,7 @@ export default class PageController {
     let sortedArr = movies.slice();
     switch (mode) {
       case SortBy.DATE:
-        sortedArr.sort((a, b) => b.date - a.date);
+        sortedArr.sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
         break;
       case SortBy.RATING:
         sortedArr.sort((a, b) => b.totalRating - a.totalRating);
@@ -219,9 +219,15 @@ export default class PageController {
     this._navigation.getElement().addEventListener(`click`, (evt) => this._onNavigationClick(evt));
   }
 
-  _onDataChange(newData) {
+  _onDataChange(newData, thisCard) {
 
-    // Переписываем видимую часть тасков
+    this._api.getMovies().then((movies) => {
+
+      this._onDataChangeMain(movies, this._userData.watchedFilms.length);
+
+    });
+
+ /*   // Переписываем видимую часть тасков
     if (this._filteredMovies) {
       this._filteredMovies = [...newData, ...this._filteredMovies.slice(this._showedMovies)];
     } else {
@@ -230,7 +236,7 @@ export default class PageController {
 
     this.update(this._cardsArr);
     this._renderPage();
-    this._onDataChangeMain(this._userData.watchedFilms.length);
+    this._onDataChangeMain(this._userData.watchedFilms.length);*/
   }
 
   _onExtraDataChange(editedCard) {

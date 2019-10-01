@@ -1,4 +1,4 @@
-import {cardsList as cards} from '../src/data.js';
+//import {cardsList as cards} from '../src/data.js';
 import {render, unrender, Position} from '../src/utils.js';
 import SearchBar from '../src/components/search-bar.js';
 import Profile from '../src/components/profile.js';
@@ -8,36 +8,11 @@ import UserData from '../src/data/user-data.js';
 
 import API from '../src/api.js';
 
-const AUTHORIZATION = `Basic dXNlckBwYXNzd29yZAo=${Math.random()}`;
+const AUTHORIZATION = `Basic dXNlckBwYXNzd29yZAo`;
 const END_POINT = `https://htmlacademy-es-9.appspot.com/cinemaddict`;
-
-
-
-
 const api = new API({endPoint: END_POINT, authorization: AUTHORIZATION});
 
-
-api.getMovies()
-  .then((movies) => console.log(movies));
-
-/*api.getMovies()
-  .then((movies) => movies.reduce((prev, curr) => {
-    return [...prev, api.getComments(curr.id)];
-  }, [])
-  .then((comments) => console.log(comments)));
-*/
-
-/*let commentsAll = [];
-
-api.getMovies()
-  .then((movies) => movies.map((movie) => api.getComments(movie.id)
-  .then((comments) => commentsAll.push(...comments))));
-
-  console.log(commentsAll);
-
-*/
-
-const onDatachenge = (watchedFilms) => {
+const refreshProfile = (watchedFilms) => {
   profile.update(watchedFilms);
 
   unrender(profile.getElement());
@@ -45,20 +20,28 @@ const onDatachenge = (watchedFilms) => {
   render(header, profile.getElement(), Position.BEFOREEND);
 };
 
-const userData = new UserData();
-userData.update(cards);
+const onDatachenge = (movies, watchedFilms) => {
+  refreshProfile(watchedFilms);
+  pageController.update(movies);
+  pageController.show(movies);
+};
 
+const userData = new UserData();
 const header = document.querySelector(`.header`);
 const main = document.querySelector(`.main`);
 const searchBar = new SearchBar();
 render(header, searchBar.getElement(), Position.BEFOREEND);
 
-const pageController = new PageController(main, onDatachenge, AUTHORIZATION);
+const pageController = new PageController(main, onDatachenge, api);
 const searchController = new SearchController(main, searchBar.getElement());
 searchController.hide();
-pageController.update(cards);
-//pageController.show(cards);
-api.getMovies().then((movies) => pageController.show(movies));
+
+api.getMovies().then((movies) => {
+  userData.update(movies);
+  refreshProfile(userData.watchedFilms.length);
+  pageController.update(movies);
+  pageController.show(movies);
+});
 
 const profile = new Profile(userData.watchedFilms.length);
 render(header, profile.getElement(), Position.BEFOREEND);

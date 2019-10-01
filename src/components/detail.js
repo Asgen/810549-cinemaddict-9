@@ -2,7 +2,7 @@ import moment from 'moment';
 import AbstractComponent from '../components/AbstractComponent.js';
 
 export default class Detail extends AbstractComponent {
-  constructor({id, title, description, director, writers, actors, duration, country, poster, date, genre, totalRating, ageRating, comments, userDetails}) {
+  constructor({id, title, description, director, writers, actors, duration, country, poster, date, genre, totalRating, ageRating, userDetails}, comments) {
     super();
     this._id = id;
     this._title = title;
@@ -28,12 +28,12 @@ export default class Detail extends AbstractComponent {
   createComment(comment) {
     return `<li id="${comment.id}" class="film-details__comment">
             <span class="film-details__comment-emoji">
-              <img src="./images/emoji/${comment.reaction}.png" width="55" height="55" alt="emoji">
+              <img src="./images/emoji/${comment.emotion}.png" width="55" height="55" alt="emoji">
             </span>
             <div>
               <p class="film-details__comment-text">${comment.comment}</p>
               <p class="film-details__comment-info">
-                <span class="film-details__comment-author">${comment.commentator}</span>
+                <span class="film-details__comment-author">${comment.author}</span>
                 <span class="film-details__comment-day">${new Date(comment.commentDate).toDateString()}</span>
                 <button class="film-details__comment-delete">Delete</button>
               </p>
@@ -186,13 +186,13 @@ export default class Detail extends AbstractComponent {
         <ul class="film-details__comments-list">
           ${this._comments.map((it) => `<li id="${it.id}" class="film-details__comment">
             <span class="film-details__comment-emoji">
-              <img src="./images/emoji/${it.reaction}.png" width="55" height="55" alt="emoji">
+              <img src="./images/emoji/${it.emotion}.png" width="55" height="55" alt="emoji">
             </span>
             <div>
               <p class="film-details__comment-text">${it.comment}</p>
               <p class="film-details__comment-info">
-                <span class="film-details__comment-author">${it.commentator}</span>
-                <span class="film-details__comment-day">${new Date(this._date).toDateString()}</span>
+                <span class="film-details__comment-author">${it.author}</span>
+                <span class="film-details__comment-day">${new Date(it.date).toDateString()}</span>
                 <button class="film-details__comment-delete">Delete</button>
               </p>
             </div>

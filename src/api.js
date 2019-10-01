@@ -36,15 +36,13 @@ export default class API {
       .then(toJSON);
   }
 
-  createComment({movieId, comment}) {
+  createComment(movieId, comment) {
     return this._load({
       url: `comments/${movieId}`,
       method: Method.POST,
       body: JSON.stringify(comment),
-      headers: new Headers()
-    })
-      .then(toJSON)
-      .then(ModelMovie.parseCards);
+      headers: new Headers({'Content-Type': `application/json`})
+    });
   }
 
   updateMovie({id, data}) {
@@ -58,11 +56,10 @@ export default class API {
       .then(ModelMovie.parseCards);
   }
 
-  deleteComment({commentId}) {
+  deleteComment(commentId) {
     return this._load({
       url: `comments/${commentId}`,
-      method: Method.DELETE,
-      headers: new Headers()
+      method: Method.DELETE
     });
   }
 

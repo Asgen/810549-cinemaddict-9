@@ -1,8 +1,9 @@
 import MovieController from '../controllers/movie-controller.js';
 
 export default class MovitListConrtroller {
-  constructor(container, onDataChange, auth) {
-    this._auth = auth;
+  constructor(container, onDataChange, api) {
+    this._api = api;
+    //this._auth = auth;
     this._cardsArr = [];
     this._container = container;
     this._onDataChangeMain = onDataChange;
@@ -10,7 +11,6 @@ export default class MovitListConrtroller {
 
     this._subscriptions = [];
     this._onDataChange = this._onDataChange.bind(this);
-    this._onChangeView = this._onChangeView.bind(this);
   }
 
   setCards(cards) {
@@ -27,11 +27,12 @@ export default class MovitListConrtroller {
   }
 
   _renderCard(card) {
-    const movieController = new MovieController(this._container, card, this._onDataChange, this._onChangeView, this._auth);
+    const movieController = new MovieController(this._container, card, this._onDataChange, this._onChangeView, this._api);
     this._subscriptions.push(movieController.setDefaultView.bind(movieController));
   }
 
   _onDataChange(oldData, newData) {
+
     const thisCard = this._cardsArr[this._cardsArr.findIndex((it) => it === oldData)];
 
     if (newData === null) {
