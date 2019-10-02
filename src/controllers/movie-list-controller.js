@@ -1,7 +1,8 @@
 import MovieController from '../controllers/movie-controller.js';
 
 export default class MovitListConrtroller {
-  constructor(container, onDataChange) {
+  constructor(container, onDataChange, api) {
+    this._api = api;
     this._cardsArr = [];
     this._container = container;
     this._onDataChangeMain = onDataChange;
@@ -9,7 +10,6 @@ export default class MovitListConrtroller {
 
     this._subscriptions = [];
     this._onDataChange = this._onDataChange.bind(this);
-    this._onChangeView = this._onChangeView.bind(this);
   }
 
   setCards(cards) {
@@ -26,35 +26,35 @@ export default class MovitListConrtroller {
   }
 
   _renderCard(card) {
-    const movieController = new MovieController(this._container, card, this._onDataChange, this._onChangeView);
+    const movieController = new MovieController(this._container, card, this._onDataChange, this._onChangeView, this._api);
     this._subscriptions.push(movieController.setDefaultView.bind(movieController));
   }
 
   _onDataChange(oldData, newData) {
+
     const thisCard = this._cardsArr[this._cardsArr.findIndex((it) => it === oldData)];
 
     if (newData === null) {
-      // console.log(`comment modified`);
+      // comment modified
+      this._onDataChangeMain();
     } else {
-
       switch (newData) {
 
         case (`watchlist`):
-          thisCard.user_details.inWatchList = !thisCard.user_details.inWatchList ? true : false;
+          thisCard.userDetails.inWatchList = !thisCard.userDetails.inWatchList;
           break;
         case (`watched`):
-          thisCard.user_details.isWatched = !thisCard.user_details.isWatched ? true : false;
-          if (thisCard.user_details.isWatched) {
-            thisCard.user_details[`watching_date`] = new Date().toISOString();
+          thisCard.userDetails.isWatched = !thisCard.userDetails.isWatched;
+          if (thisCard.userDetails.isWatched) {
+            thisCard.userDetails.watchingDate = new Date().toISOString();
           }
           break;
         case (`favorite`):
-          thisCard.user_details.isFavorite = thisCard.user_details.isFavorite !== true ? true : false;
+          thisCard.userDetails.isFavorite = !thisCard.userDetails.isFavorite;
           break;
       }
+      this._api.updateMovie(thisCard.id, thisCard.toRAW()).then(() => this._onDataChangeMain(this._cardsArr, thisCard));
     }
-
-    this._onDataChangeMain(this._cardsArr, thisCard);
   }
 
   _onChangeView() {

@@ -1,10 +1,12 @@
 import moment from 'moment';
 import AbstractComponent from '../components/AbstractComponent.js';
 
-export default class ShowMoreBtn extends AbstractComponent {
-  constructor({title, description, director, writers, actors, duration, country, poster, date, genre, total_rating: totalRate, age_rating: ageRate, comments, user_details: user}) {
+export default class Detail extends AbstractComponent {
+  constructor({id, title, alternativeTitle, description, director, writers, actors, duration, country, poster, date, genre, totalRating, ageRating, userDetails}, comments) {
     super();
+    this._id = id;
     this._title = title;
+    this._alternativeTitle = alternativeTitle;
     this._description = description;
     this._director = director;
     this._writers = writers;
@@ -14,12 +16,12 @@ export default class ShowMoreBtn extends AbstractComponent {
     this._poster = poster;
     this._date = date;
     this._genre = genre;
-    this._rate = totalRate;
-    this._age = ageRate;
+    this._rate = totalRating;
+    this._age = ageRating;
     this._comments = comments;
-    this._isWatched = user.isWatched;
-    this._inWatchList = user.inWatchList;
-    this._isFavorite = user.isFavorite;
+    this._isWatched = userDetails.isWatched;
+    this._inWatchList = userDetails.inWatchList;
+    this._isFavorite = userDetails.isFavorite;
 
     this._onControlClick();
   }
@@ -27,12 +29,12 @@ export default class ShowMoreBtn extends AbstractComponent {
   createComment(comment) {
     return `<li id="${comment.id}" class="film-details__comment">
             <span class="film-details__comment-emoji">
-              <img src="./images/emoji/${comment.reaction}.png" width="55" height="55" alt="emoji">
+              <img src="./images/emoji/${comment.emotion}.png" width="55" height="55" alt="emoji">
             </span>
             <div>
               <p class="film-details__comment-text">${comment.comment}</p>
               <p class="film-details__comment-info">
-                <span class="film-details__comment-author">${comment.commentator}</span>
+                <span class="film-details__comment-author">${comment.author}</span>
                 <span class="film-details__comment-day">${new Date(comment.commentDate).toDateString()}</span>
                 <button class="film-details__comment-delete">Delete</button>
               </p>
@@ -68,7 +70,7 @@ export default class ShowMoreBtn extends AbstractComponent {
           <div class="film-details__info-head">
             <div class="film-details__title-wrap">
               <h3 class="film-details__title">${this._title}</h3>
-              <p class="film-details__title-original">${this._title}</p>
+              <p class="film-details__title-original">${this._alternativeTitle}</p>
             </div>
 
             <div class="film-details__rating">
@@ -95,7 +97,7 @@ export default class ShowMoreBtn extends AbstractComponent {
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Runtime</td>
-              <td class="film-details__cell">${this._duration}</td>
+              <td class="film-details__cell">${Math.floor(this._duration / 60)}h ${this._duration % 60}m</td>
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Country</td>
@@ -185,13 +187,13 @@ export default class ShowMoreBtn extends AbstractComponent {
         <ul class="film-details__comments-list">
           ${this._comments.map((it) => `<li id="${it.id}" class="film-details__comment">
             <span class="film-details__comment-emoji">
-              <img src="./images/emoji/${it.reaction}.png" width="55" height="55" alt="emoji">
+              <img src="./images/emoji/${it.emotion}.png" width="55" height="55" alt="emoji">
             </span>
             <div>
               <p class="film-details__comment-text">${it.comment}</p>
               <p class="film-details__comment-info">
-                <span class="film-details__comment-author">${it.commentator}</span>
-                <span class="film-details__comment-day">${new Date(this._date).toDateString()}</span>
+                <span class="film-details__comment-author">${it.author}</span>
+                <span class="film-details__comment-day">${new Date(it.date).toDateString()}</span>
                 <button class="film-details__comment-delete">Delete</button>
               </p>
             </div>

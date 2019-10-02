@@ -48,22 +48,22 @@ export default class StatisticController {
 
     switch (evt.target.value) {
       case `today`:
-        const filterToday = this._cards.filter((card) => moment().isSame(card.user_details.watching_date, `day`));
+        const filterToday = this._cards.filter((card) => moment().isSame(card.userDetails.watchingDate, `day`));
         this._userData.update(filterToday);
         this._render();
         break;
       case `week`:
-        const filterWeek = this._cards.filter((card) => moment().isSame(card.user_details.watching_date, `week`));
+        const filterWeek = this._cards.filter((card) => moment().isSame(card.userDetails.watchingDate, `week`));
         this._userData.update(filterWeek);
         this._render();
         break;
       case `month`:
-        const filterMonth = this._cards.filter((card) => moment().isSame(card.user_details.watching_date, `month`));
+        const filterMonth = this._cards.filter((card) => moment().isSame(card.userDetails.watchingDate, `month`));
         this._userData.update(filterMonth);
         this._render();
         break;
       case `year`:
-        const filterYear = this._cards.filter((card) => moment().isSame(card.user_details.watching_date, `year`));
+        const filterYear = this._cards.filter((card) => moment().isSame(card.userDetails.watchingDate, `year`));
         this._userData.update(filterYear);
         this._render();
         break;

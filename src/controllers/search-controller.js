@@ -8,10 +8,13 @@ import FilmsList from '../components/films-list.js';
 import FilmsContainer from '../components/films-container.js';
 import MovitListConrtroller from '../controllers/movie-list-controller.js';
 
+const CARDS_IN_ROW = 5;
 
 export default class SearchController {
-  constructor(container, input) {
+  constructor(container, input, onDataChange, api) {
+    this._api = api;
     this._cardsArr = [];
+    this._searchArr = [];
     this._container = container;
     this._input = input;
     this._querry = ``;
@@ -23,9 +26,10 @@ export default class SearchController {
     this._noResult = new SearchNoResult();
     this._unrenderedCards = 0;
 
+    this._onDataChangeMain = onDataChange;
+    this._showedMovies = CARDS_IN_ROW;
     this._subscriptions = [];
-    this._onDataChange = this._onDataChange.bind(this);
-    this._onChangeView = this._onChangeView.bind(this);
+    this._movitListConrtroller = new MovitListConrtroller(this._filmsListContainer.getElement(), this._onDataChange.bind(this), this._api);
 
     this.init();
   }
@@ -39,26 +43,29 @@ export default class SearchController {
       if (evt.target.value.length < 3) {
         return;
       }
-      this.show(evt.target.value, this._cardsArr);
+      this.show(evt.target.value);
     });
   }
 
-  show(querry, cards) {
-
+  setCards(cards) {
     this._cardsArr = cards;
+  }
+
+  show(querry) {
+    this._showedMovies = CARDS_IN_ROW;
     this._querry = querry.replace(/[^а-яёa-z0-9\s\.]/gmi, ` `);
     let re = new RegExp(this._querry, `gim`);
 
-    const searchArr = this._cardsArr.filter((it) => it.title.match(re) !== null);
+    this._searchArr = this._cardsArr.filter((it) => it.title.match(re) !== null);
 
     if (this._container.contains(this._searchResult.getElement())) {
       unrender(this._searchResult.getElement());
     }
-    this._searchResult.setCount(searchArr.length);
+    this._searchResult.setCount(this._searchArr.length);
     render(this._container, this._searchResult.getElement(), Position.AFTERBEGIN);
 
     this._filmsListContainer.getElement().innerHTML = ``;
-    this._setCards(searchArr);
+    this._setCards(this._searchArr);
 
     this._films.getElement().classList.remove(`visually-hidden`);
     this._searchResult.getElement().classList.remove(`visually-hidden`);
@@ -67,41 +74,44 @@ export default class SearchController {
   hide() {
     this._films.getElement().classList.add(`visually-hidden`);
     this._searchResult.getElement().classList.add(`visually-hidden`);
-
   }
 
   _setCards(cards) {
-
     const cardsList = cards.slice();
-    const movitListConrtroller = new MovitListConrtroller(this._filmsListContainer.getElement(), this._onDataChange, this._onChangeView);
 
-    if (cardsList.length < 1) {
-      render(this._filmsList.getElement(), this._noResult.getElement(), Position.AFTERBEGIN);
-    } else {
-      if (this._filmsList.getElement().contains(this._noResult.getElement())) {
-        unrender(this._noResult.getElement());
-      }
-      movitListConrtroller.init(cardsList);
-      this._unrenderedCards = cardsList;
+    unrender(this._showMoreBtn.getElement());
+    this._showMoreBtn.removeElement();
+
+    if (this._showedMovies < cardsList.length) {
+      render(this._filmsList.getElement(), this._showMoreBtn.getElement(), Position.BEFOREEND);
     }
-    this._showMoreBtn.getElement().addEventListener(`click`, () => {
-      if (this._unrenderedCards.length > 0) {
-        movitListConrtroller.init(this._unrenderedCards);
-      }
-      if (this._unrenderedCards.length < 1) {
-        unrender(this._showMoreBtn.getElement());
-      }
-    });
+
+    this._movitListConrtroller.setCards(cardsList.slice(0, this._showedMovies));
+
+    this._showMoreBtn.getElement()
+      .addEventListener(`click`, () => {
+
+        this._movitListConrtroller.addTasks(cardsList.slice(this._showedMovies, this._showedMovies + CARDS_IN_ROW));
+
+        this._showedMovies += CARDS_IN_ROW;
+
+        if (this._showedMovies >= cardsList.length) {
+          unrender(this._showMoreBtn.getElement());
+          this._showMoreBtn.removeElement();
+        }
+      });
   }
 
-  _onDataChange(newData) {
+  _onDataChange(newMoviesList, changedMovie) {
 
-    unrender(this._filmsListContainer.getElement());
-    this._filmsListContainer.removeElement();
+    if (newMoviesList && changedMovie) {
+      this._api.updateMovie(changedMovie.id, changedMovie.toRAW());
+      this._setCards(newMoviesList);
+      this._unrenderedCards = newMoviesList;
+    }
 
-    render(this._filmsList. getElement(), this._filmsListContainer.getElement(), Position.BEFOREEND);
-    this._setCards(newData);
-    this._unrenderedCards = newData;
+    this._onDataChangeMain();
+
   }
 
   _onChangeView() {
