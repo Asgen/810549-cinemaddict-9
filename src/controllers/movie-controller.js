@@ -4,7 +4,7 @@ import Detail from '../components/detail.js';
 
 
 export default class MovieController {
-  constructor(container, data, onDataChange, onChangeView, api) {
+  constructor({container, data, onDataChange, onChangeView, api}) {
     this._container = container;
     this._data = data;
     this._card = new Card(data);
@@ -21,6 +21,7 @@ export default class MovieController {
 
     const body = document.querySelector(`body`);
     this._detail = new Detail(this._data, comments);
+    const userRateElement = this._detail.getElement().querySelector(`.film-details__user-rating`);
     render(body, this._detail.getElement(), Position.BEFOREEND);
 
     document.addEventListener(`keydown`, (e) => this._onEscKeyDown(e));
@@ -35,21 +36,53 @@ export default class MovieController {
           document.removeEventListener(`keydown`, this._onEscKeyDown);
         });
 
+    // Установка рейтинга фильма
+    for (let bage of this._detail.getElement().querySelectorAll(`.film-details__user-rating-input`)) {
+      bage.addEventListener(`change`, (evt) => {
+        evt.preventDefault();
+        this._data.userDetails.personalRating = parseInt(evt.target.value, 10);
+        this._api.updateMovie(this._data.id, this._data.toRAW()).then(() => this._onDataChange(this._data, null));
+        if (userRateElement) {
+          this._detail.updatePersonalRating(evt.target.value);
+        }
+      });
+    }
+
+    // Сброс рейтинга
+    this._detail.getElement().querySelector(`.film-details__watched-reset`)
+    .addEventListener(`click`, (e) => {
+      e.preventDefault();
+      if (this._data.userDetails.personalRating) {
+        this._data.userDetails.personalRating = 0;
+        this._api.updateMovie(this._data.id, this._data.toRAW()).then(() => this._onDataChange(this._data, null));
+        this._detail.getElement().querySelector(`input[name="score"]:checked`).checked = false;
+        userRateElement.remove();
+      }
+    });
+
     // Обработка нажатий на контроль фильма в детальном просмотре
     for (let control of this._detail.getElement().querySelectorAll(`.film-details__control-input`)) {
       control.addEventListener(`change`, (evt) => {
         evt.preventDefault();
+        let controlType = ``;
         switch (evt.target.id) {
           case (`watchlist`):
-            this._onDataChange(this._data, `watchlist`);
+            controlType = `watchlist`;
             break;
           case (`watched`):
-            this._onDataChange(this._data, `watched`);
+            controlType = `watched`;
             break;
           case (`favorite`):
-            this._onDataChange(this._data, `favorite`);
+            controlType = `favorite`;
             break;
         }
+
+        // Обнуление рейтинга при удалении из истории просмотра
+        if (!this._detail.getElement().querySelector(`input[id="watched"]:checked`)) {
+          this._detail.getElement().querySelector(`input[name="score"]:checked`).checked = false;
+          this._detail.removePersonalRating();
+        }
+        this._onDataChange(this._data, controlType);
       });
     }
 
@@ -89,10 +122,12 @@ export default class MovieController {
           'date': new Date().toISOString(),
         };
 
-        const commentDOM = createElement(this._detail.createComment(newComment));
-        render(this._detail.getElement().querySelector(`.film-details__comments-list`), commentDOM, Position.BEFOREEND);
-
-        this._api.createComment(this._data.id, newComment).then(() => this._onDataChange(this._data, null));
+        this._api.createComment(this._data.id, newComment).then((response) => {
+          newComment.id = response.comments[response.comments.length - 1].id;
+          const commentDOM = createElement(this._detail.createComment(newComment));
+          render(this._detail.getElement().querySelector(`.film-details__comments-list`), commentDOM, Position.BEFOREEND);
+          this._onDataChange(this._data, null);
+        });
 
         let checkedInput = this._detail.getElement().querySelector(`INPUT[name="comment-emoji"]:checked`);
         emojiContainer.innerHTML = ``;

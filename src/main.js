@@ -41,6 +41,7 @@ const searchController = new SearchController(main, searchBar.getElement(), onDa
 searchController.hide();
 
 api.getMovies().then((movies) => {
+
   userData.update(movies);
   refreshProfile(userData.watchedFilms.length);
   pageController.update(movies);

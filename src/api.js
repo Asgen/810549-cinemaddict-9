@@ -42,7 +42,8 @@ export default class API {
       method: Method.POST,
       body: JSON.stringify(comment),
       headers: new Headers({'Content-Type': `application/json`})
-    });
+    })
+      .then(toJSON);
   }
 
   updateMovie(id, data) {

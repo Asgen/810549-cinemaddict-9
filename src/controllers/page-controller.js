@@ -31,8 +31,6 @@ export default class PageController {
     this._sortMoviesBy = SortBy.DEFAULT;
 
     this._showedMovies = CARDS_IN_ROW;
-    this._isHidden = false;
-
     this._subscriptions = [];
 
     this._extraMoviesController = new ExtraMoviesController(this._films.getElement(), this._onExtraDataChange.bind(this), this._api);
@@ -90,11 +88,10 @@ export default class PageController {
   _setCards(cards, showedMovies) {
     this._cardsArr = this._filteredMovies ? this._cardsArr : cards;
     this._showedMovies = showedMovies ? showedMovies : CARDS_IN_ROW;
-    this._renderPage(cards);
+    this._renderPage();
   }
 
   show() {
-    this._isHidden = false;
     this._films.getElement().classList.remove(`visually-hidden`);
     this._sort.getElement().classList.remove(`visually-hidden`);
     this._navigation.getElement().classList.remove(`visually-hidden`);
@@ -107,7 +104,6 @@ export default class PageController {
   }
 
   hide() {
-    this._isHidden = true;
     this._films.getElement().classList.add(`visually-hidden`);
     this._sort.getElement().classList.add(`visually-hidden`);
     this._navigation.getElement().classList.add(`visually-hidden`);
@@ -219,9 +215,12 @@ export default class PageController {
     this._navigation.getElement().addEventListener(`click`, (evt) => this._onNavigationClick(evt));
   }
 
-  _onDataChange() {
+  _onDataChange(newMovies, newCard, pop) {
+
+    let openCardId = pop ? newCard.id : null;
+
     this._api.getMovies().then((movies) => {
-      this.update(movies, this._showedMovies);
+      this.update(movies, this._showedMovies, openCardId);
     });
   }
 
