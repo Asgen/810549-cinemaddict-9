@@ -2,10 +2,11 @@ import moment from 'moment';
 import AbstractComponent from '../components/AbstractComponent.js';
 
 export default class Detail extends AbstractComponent {
-  constructor({id, title, description, director, writers, actors, duration, country, poster, date, genre, totalRating, ageRating, userDetails}, comments) {
+  constructor({id, title, alternativeTitle, description, director, writers, actors, duration, country, poster, date, genre, totalRating, ageRating, userDetails}, comments) {
     super();
     this._id = id;
     this._title = title;
+    this._alternativeTitle = alternativeTitle;
     this._description = description;
     this._director = director;
     this._writers = writers;
@@ -69,7 +70,7 @@ export default class Detail extends AbstractComponent {
           <div class="film-details__info-head">
             <div class="film-details__title-wrap">
               <h3 class="film-details__title">${this._title}</h3>
-              <p class="film-details__title-original">${this._title}</p>
+              <p class="film-details__title-original">${this._alternativeTitle}</p>
             </div>
 
             <div class="film-details__rating">

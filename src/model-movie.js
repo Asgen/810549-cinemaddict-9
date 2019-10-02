@@ -18,7 +18,7 @@ export default class ModelMovie {
       personalRating: data[`user_details`][`personal_rating`],
       isFavorite: data[`user_details`][`favorite`],
       isWatched: data[`user_details`][`already_watched`],
-      inWatchlist: data[`user_details`][`watchlist`],
+      inWatchList: data[`user_details`][`watchlist`],
       watchingDate: data[`user_details`][`watching_date`],
     };
     this.comments = data[`comments`];
@@ -30,5 +30,36 @@ export default class ModelMovie {
 
   static parseCards(data) {
     return data.map(ModelMovie.parseCard);
+  }
+
+  toRAW() {
+    return {
+      "id": this.id,
+      "comments": this.comments,
+      "film_info": {
+        "title": this.title,
+        "alternative_title": this.alternativeTitle,
+        "total_rating": this.totalRating,
+        "poster": this.poster,
+        "age_rating": this.ageRating,
+        "director": this.director,
+        "writers": Array.from(this.writers),
+        "actors": Array.from(this.actors),
+        "release": {
+          "date": this.date,
+          "release_country": this.country
+        },
+        "runtime": this.duration,
+        "genre": Array.from(this.genre),
+        "description": this.description
+      },
+      "user_details": {
+        "personal_rating": this.userDetails.personalRating,
+        "watchlist": this.userDetails.inWatchList,
+        "already_watched": this.userDetails.isWatched,
+        "watching_date": new Date(this.userDetails.watchingDate).toISOString(),
+        "favorite": this.userDetails.isFavorite
+      }
+    };
   }
 }

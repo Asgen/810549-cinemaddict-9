@@ -12,7 +12,8 @@ const Title = {
 };
 
 export default class ExtraMoviesController {
-  constructor(container, onDataChange) {
+  constructor(container, onDataChange, api) {
+    this._api = api;
     this._onDataChangeMain = onDataChange;
     this._container = container;
     this._movies = [];
@@ -24,8 +25,8 @@ export default class ExtraMoviesController {
     this._filmsListContainerLeft = new FilmsContainer();
     this._filmsListContainerRight = new FilmsContainer();
 
-    this._moviesListControllerLeft = new MovitListConrtroller(this._filmsListContainerLeft.getElement(), this._onDataChange.bind(this));
-    this._moviesListControllerRight = new MovitListConrtroller(this._filmsListContainerRight.getElement(), this._onDataChange.bind(this));
+    this._moviesListControllerLeft = new MovitListConrtroller(this._filmsListContainerLeft.getElement(), this._onDataChange.bind(this), this._api);
+    this._moviesListControllerRight = new MovitListConrtroller(this._filmsListContainerRight.getElement(), this._onDataChange.bind(this), this._api);
   }
 
   render(allMovies) {
@@ -62,7 +63,7 @@ export default class ExtraMoviesController {
     return topMovies;
   }
 
-  _onDataChange(editedCards, editedCard) {
-    this._onDataChangeMain(editedCard);
+  _onDataChange() {
+    this._onDataChangeMain();
   }
 }

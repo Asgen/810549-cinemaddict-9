@@ -45,15 +45,15 @@ export default class API {
     });
   }
 
-  updateMovie({id, data}) {
+  updateMovie(id, data) {
     return this._load({
       url: `movies/${id}`,
       method: Method.PUT,
       body: JSON.stringify(data),
-      headers: new Headers()
+      headers: new Headers({'Content-Type': `application/json`})
     })
       .then(toJSON)
-      .then(ModelMovie.parseCards);
+      .then(ModelMovie.parseCard);
   }
 
   deleteComment(commentId) {

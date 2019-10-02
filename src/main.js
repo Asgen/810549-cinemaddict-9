@@ -1,4 +1,3 @@
-//import {cardsList as cards} from '../src/data.js';
 import {render, unrender, Position} from '../src/utils.js';
 import SearchBar from '../src/components/search-bar.js';
 import Profile from '../src/components/profile.js';
@@ -20,10 +19,15 @@ const refreshProfile = (watchedFilms) => {
   render(header, profile.getElement(), Position.BEFOREEND);
 };
 
-const onDatachenge = (movies, watchedFilms) => {
-  refreshProfile(watchedFilms);
-  pageController.update(movies);
-  pageController.show(movies);
+const onDatachenge = (showedMovies) => {
+/*  refreshProfile(watchedFilms);
+  pageController.update(movies, showedMovies);*/
+
+  api.getMovies().then((movies) => {
+    userData.update(movies);
+    refreshProfile(userData.watchedFilms.length);
+    pageController.update(movies, showedMovies);
+  });
 };
 
 const userData = new UserData();
@@ -33,7 +37,7 @@ const searchBar = new SearchBar();
 render(header, searchBar.getElement(), Position.BEFOREEND);
 
 const pageController = new PageController(main, onDatachenge, api);
-const searchController = new SearchController(main, searchBar.getElement());
+const searchController = new SearchController(main, searchBar.getElement(), onDatachenge, api);
 searchController.hide();
 
 api.getMovies().then((movies) => {
@@ -41,6 +45,7 @@ api.getMovies().then((movies) => {
   refreshProfile(userData.watchedFilms.length);
   pageController.update(movies);
   pageController.show(movies);
+  searchController.setCards(movies);
 });
 
 const profile = new Profile(userData.watchedFilms.length);
@@ -48,16 +53,16 @@ render(header, profile.getElement(), Position.BEFOREEND);
 
 searchBar.getElement().querySelector(`.search__reset`)
   .addEventListener(`click`, () => {
-    pageController.show(cards);
+    pageController.show();
     searchController.hide();
   });
 
 searchBar.getElement().addEventListener(`keyup`, (evt) => {
   if (evt.target.value.length < 3) {
-    pageController.show(cards);
+    pageController.show();
     searchController.hide();
   } else {
     pageController.hide();
-    searchController.show(evt.target.value, cards);
+    searchController.show(evt.target.value);
   }
 });

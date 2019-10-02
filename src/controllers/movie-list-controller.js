@@ -3,7 +3,6 @@ import MovieController from '../controllers/movie-controller.js';
 export default class MovitListConrtroller {
   constructor(container, onDataChange, api) {
     this._api = api;
-    //this._auth = auth;
     this._cardsArr = [];
     this._container = container;
     this._onDataChangeMain = onDataChange;
@@ -36,27 +35,26 @@ export default class MovitListConrtroller {
     const thisCard = this._cardsArr[this._cardsArr.findIndex((it) => it === oldData)];
 
     if (newData === null) {
-      // console.log(`comment modified`);
+      // comment modified
+      this._onDataChangeMain();
     } else {
-
       switch (newData) {
 
         case (`watchlist`):
-          thisCard.userDetails.inWatchList = !thisCard.userDetails.inWatchList ? true : false;
+          thisCard.userDetails.inWatchList = !thisCard.userDetails.inWatchList;
           break;
         case (`watched`):
-          thisCard.userDetails.isWatched = !thisCard.userDetails.isWatched ? true : false;
+          thisCard.userDetails.isWatched = !thisCard.userDetails.isWatched;
           if (thisCard.userDetails.isWatched) {
             thisCard.userDetails.watchingDate = new Date().toISOString();
           }
           break;
         case (`favorite`):
-          thisCard.userDetails.isFavorite = thisCard.userDetails.isFavorite !== true ? true : false;
+          thisCard.userDetails.isFavorite = !thisCard.userDetails.isFavorite;
           break;
       }
+      this._api.updateMovie(thisCard.id, thisCard.toRAW()).then(() => this._onDataChangeMain(this._cardsArr, thisCard));
     }
-
-    this._onDataChangeMain(this._cardsArr, thisCard);
   }
 
   _onChangeView() {

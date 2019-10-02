@@ -5,7 +5,6 @@ import Detail from '../components/detail.js';
 
 export default class MovieController {
   constructor(container, data, onDataChange, onChangeView, api) {
-    //this._auth = auth;
     this._container = container;
     this._data = data;
     this._card = new Card(data);
