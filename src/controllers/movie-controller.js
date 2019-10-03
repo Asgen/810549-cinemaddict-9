@@ -104,7 +104,10 @@ export default class MovieController {
             }
           });
 
-        this._api.deleteComment(commentId).then(() => this._onDataChange(this._data, null));
+        this._api.deleteComment(commentId).then(() => {
+          this._detail.updateCommentsCount(this._detail.getElement().querySelectorAll(`.film-details__comment`).length);
+          this._onDataChange(this._data, null);
+        });
       });
 
     // Добавление комментария
@@ -116,16 +119,17 @@ export default class MovieController {
 
       if (evt.key === `Enter` && evt.ctrlKey && commentInput.value && emojiContainer.querySelector(`img`)) {
 
-        const newComment = {
+        let newComment = {
           'comment': commentInput.value.replace(/[^а-яёa-z0-9\s\.]/gmi, ` `),
           'emotion': this._detail.getElement().querySelector(`input[name="comment-emoji"]:checked`).value,
           'date': new Date().toISOString(),
         };
 
         this._api.createComment(this._data.id, newComment).then((response) => {
-          newComment.id = response.comments[response.comments.length - 1].id;
+          newComment = response.comments[response.comments.length - 1];
           const commentDOM = createElement(this._detail.createComment(newComment));
           render(this._detail.getElement().querySelector(`.film-details__comments-list`), commentDOM, Position.BEFOREEND);
+          this._detail.updateCommentsCount(this._detail.getElement().querySelectorAll(`.film-details__comment`).length);
           this._onDataChange(this._data, null);
         });
 

@@ -30,22 +30,27 @@ export default class ExtraMoviesController {
   }
 
   render(allMovies) {
+    if (allMovies.length < 1) {
+      return;
+    }
+
     this._movies = allMovies;
 
-    const topRated = this._getTop(Title.RATE);
-    const topComments = this._getTop(Title.COMMENT);
+    if (allMovies.findIndex((it) => it.comments.length > 0) > -1) {
+      const topComments = this._getTop(Title.COMMENT);
+      render(this._container, this._filmsListRight.getElement(), Position.BEFOREEND);
+      render(this._filmsListRight.getElement(), this._filmsListTitleRight.getElement(), Position.BEFOREEND);
+      render(this._filmsListRight.getElement(), this._filmsListContainerRight.getElement(), Position.BEFOREEND);
+      this._moviesListControllerRight.setCards(topComments);
+    }
 
-    render(this._container, this._filmsListLeft.getElement(), Position.BEFOREEND);
-    render(this._filmsListLeft.getElement(), this._filmsListTitleLeft.getElement(), Position.BEFOREEND);
-    render(this._filmsListLeft.getElement(), this._filmsListContainerLeft.getElement(), Position.BEFOREEND);
-
-    render(this._container, this._filmsListRight.getElement(), Position.BEFOREEND);
-    render(this._filmsListRight.getElement(), this._filmsListTitleRight.getElement(), Position.BEFOREEND);
-    render(this._filmsListRight.getElement(), this._filmsListContainerRight.getElement(), Position.BEFOREEND);
-
-
-    this._moviesListControllerLeft.setCards(topRated);
-    this._moviesListControllerRight.setCards(topComments);
+    if (allMovies.findIndex((it) => it.totalRating !== 0) > -1) {
+      const topRated = this._getTop(Title.RATE);
+      render(this._container, this._filmsListLeft.getElement(), Position.BEFOREEND);
+      render(this._filmsListLeft.getElement(), this._filmsListTitleLeft.getElement(), Position.BEFOREEND);
+      render(this._filmsListLeft.getElement(), this._filmsListContainerLeft.getElement(), Position.BEFOREEND);
+      this._moviesListControllerLeft.setCards(topRated);
+    }
   }
 
   _getTop(mode) {

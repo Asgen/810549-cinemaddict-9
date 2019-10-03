@@ -9,6 +9,13 @@ const SortBy = {
   DEFAULT: `default`
 };
 
+const FilterBy = {
+  WATCHLIST: `watchlist`,
+  HISTORY: `history`,
+  FAVORITES: `favorites`,
+  ALL: `all`
+};
+
 const createElement = (tempalete) => {
   const element = document.createElement(`div`);
   element.innerHTML = tempalete;
@@ -33,4 +40,4 @@ const unrender = (element) => {
   }
 };
 
-export {createElement, render, unrender, Position, SortBy};
+export {createElement, render, unrender, Position, SortBy, FilterBy};

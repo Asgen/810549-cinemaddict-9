@@ -1,5 +1,5 @@
 import UserData from '../data/user-data.js';
-import {render, unrender, Position, SortBy} from '../utils.js';
+import {render, unrender, Position, SortBy, FilterBy} from '../utils.js';
 import Navigation from '../components/navigation.js';
 import Films from '../components/films.js';
 import ShowMoreBtn from '../components/show-more-button.js';
@@ -29,6 +29,8 @@ export default class PageController {
     this._unrenderedCards = 0;
     this._filteredMovies = null;
     this._sortMoviesBy = SortBy.DEFAULT;
+    this._filterBy = FilterBy.ALL;
+    this._isHidden = false;
 
     this._showedMovies = CARDS_IN_ROW;
     this._subscriptions = [];
@@ -86,12 +88,17 @@ export default class PageController {
   }
 
   _setCards(cards, showedMovies) {
-    this._cardsArr = this._filteredMovies ? this._cardsArr : cards;
+    this._cardsArr = cards;
+
+    if (this._filterBy) {
+      this._filteredMovies = this._filterMovies(this._cardsArr, this._filterBy);
+    }
     this._showedMovies = showedMovies ? showedMovies : CARDS_IN_ROW;
     this._renderPage();
   }
 
   show() {
+    this._isHidden = false;
     this._films.getElement().classList.remove(`visually-hidden`);
     this._sort.getElement().classList.remove(`visually-hidden`);
     this._navigation.getElement().classList.remove(`visually-hidden`);
@@ -104,6 +111,7 @@ export default class PageController {
   }
 
   hide() {
+    this._isHidden = true;
     this._films.getElement().classList.add(`visually-hidden`);
     this._sort.getElement().classList.add(`visually-hidden`);
     this._navigation.getElement().classList.add(`visually-hidden`);
@@ -162,26 +170,8 @@ export default class PageController {
     switch (evt.target.dataset.navType) {
       case (`all`):
         this.show();
-        this._filteredMovies = null;
+        this._filterBy = null;
         this._setCards(this._cardsArr.slice());
-        this._statisticController.hide();
-        break;
-      case (`watchlist`):
-        this.show();
-        this._filteredMovies = this._cardsArr.filter((it) => it.userDetails.inWatchList === true);
-        this._setCards(this._filteredMovies);
-        this._statisticController.hide();
-        break;
-      case (`history`):
-        this.show();
-        this._filteredMovies = this._cardsArr.filter((it) => it.userDetails.isWatched === true);
-        this._setCards(this._filteredMovies);
-        this._statisticController.hide();
-        break;
-      case (`favorites`):
-        this.show();
-        this._filteredMovies = this._cardsArr.filter((it) => it.userDetails.isFavorite === true);
-        this._setCards(this._filteredMovies);
         this._statisticController.hide();
         break;
       case (`stats`):
@@ -189,7 +179,33 @@ export default class PageController {
         this._navigation.getElement().classList.remove(`visually-hidden`);
         this._statisticController.show(this._userData.watchedFilms, this._userData.rank);
         break;
+      default:
+        this.show();
+        this._filterBy = evt.target.dataset.navType;
+        this._setCards(this._cardsArr.slice());
+        this._statisticController.hide();
+        break;
     }
+  }
+
+  _filterMovies(allMovies, filter) {
+    let filteredArr = [];
+
+    switch (filter) {
+      case (FilterBy.WATCHLIST):
+        filteredArr = allMovies.filter((it) => it.userDetails.inWatchList === true);
+        break;
+      case (FilterBy.HISTORY):
+        filteredArr = allMovies.filter((it) => it.userDetails.isWatched === true);
+        break;
+      case (FilterBy.FAVORITES):
+        filteredArr = allMovies.filter((it) => it.userDetails.isFavorite === true);
+        break;
+      case (FilterBy.ALL):
+        filteredArr = null;
+        break;
+    }
+    return filteredArr;
   }
 
   _updateNavigation() {
@@ -215,12 +231,10 @@ export default class PageController {
     this._navigation.getElement().addEventListener(`click`, (evt) => this._onNavigationClick(evt));
   }
 
-  _onDataChange(newMovies, newCard, pop) {
-
-    let openCardId = pop ? newCard.id : null;
+  _onDataChange(newMovies, newCard) {
 
     this._api.getMovies().then((movies) => {
-      this.update(movies, this._showedMovies, openCardId);
+      this.update(movies, this._showedMovies);
     });
   }
 

@@ -24,6 +24,7 @@ const onDatachenge = (showedMovies) => {
   pageController.update(movies, showedMovies);*/
 
   api.getMovies().then((movies) => {
+    console.log(movies);
     userData.update(movies);
     refreshProfile(userData.watchedFilms.length);
     pageController.update(movies, showedMovies);

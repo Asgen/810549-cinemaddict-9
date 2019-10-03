@@ -36,7 +36,7 @@ export default class Detail extends AbstractComponent {
               <p class="film-details__comment-text">${comment.comment}</p>
               <p class="film-details__comment-info">
                 <span class="film-details__comment-author">${comment.author}</span>
-                <span class="film-details__comment-day">${new Date(comment.commentDate).toDateString()}</span>
+                <span class="film-details__comment-day">${new Date(comment.date).toDateString()}</span>
                 <button class="film-details__comment-delete">Delete</button>
               </p>
             </div>
@@ -49,6 +49,10 @@ export default class Detail extends AbstractComponent {
 
   removePersonalRating() {
     this.getElement().querySelector(`.film-details__user-rating`).innerText = ``;
+  }
+
+  updateCommentsCount(count) {
+    this.getElement().querySelector(`.film-details__comments-count`).innerText = count;
   }
 
   _onControlClick() {
@@ -161,7 +165,7 @@ export default class Detail extends AbstractComponent {
             ${Array.from(Array(9))
                   .map((it, index) => `<input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="${index + 1}" id="rating-${index + 1}" ${this._personalRate === index + 1 ? `checked` : ``}>
               <label class="film-details__user-rating-label" for="rating-${index + 1}">${index + 1}</label>`)
-                  .join(``)}              
+                  .join(``)}
 
             </div>
           </section>
