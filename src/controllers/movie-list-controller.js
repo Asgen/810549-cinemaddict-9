@@ -3,7 +3,7 @@ import MovieController from '../controllers/movie-controller.js';
 export default class MovitListConrtroller {
   constructor(container, onDataChange, api) {
     this._api = api;
-    this._cardsArr = [];
+    this._movies = [];
     this._container = container;
     this._onDataChangeMain = onDataChange;
     this._unrenderedCards = 0;
@@ -13,16 +13,16 @@ export default class MovitListConrtroller {
   }
 
   setCards(cards, openCardId) {
-    this._cardsArr = cards;
+    this._movies = cards;
     this._subscriptions = [];
 
     this._container.innerHTML = ``;
-    this._cardsArr.forEach((card) => this._renderCard(card, openCardId));
+    this._movies.forEach((card) => this._renderCard(card, openCardId));
   }
 
   addTasks(cards) {
     cards.forEach((card) => this._renderCard(card));
-    this._cardsArr = this._cardsArr.concat(cards);
+    this._movies = this._movies.concat(cards);
   }
 
   _renderCard(card, openedCardId) {
@@ -39,15 +39,15 @@ export default class MovitListConrtroller {
     this._subscriptions.push(movieController.setDefaultView.bind(movieController));
   }
 
-  _onDataChange(oldData, newData) {
+  _onDataChange(oldData, controlType) {
 
-    const thisCard = this._cardsArr[this._cardsArr.findIndex((it) => it.id === oldData.id)];
+    const thisCard = this._movies[this._movies.findIndex((it) => it.id === oldData.id)];
 
-    if (newData === null) {
+    if (controlType === null) {
       // comment modified
-      this._onDataChangeMain(this._cardsArr, thisCard);
+      this._onDataChangeMain(this._movies, thisCard);
     } else {
-      switch (newData) {
+      switch (controlType) {
 
         case (`watchlist`):
           thisCard.userDetails.inWatchList = !thisCard.userDetails.inWatchList;
@@ -65,7 +65,7 @@ export default class MovitListConrtroller {
           break;
       }
 
-      this._api.updateMovie(thisCard.id, thisCard.toRAW()).then(() => this._onDataChangeMain(this._cardsArr, thisCard));
+      this._api.updateMovie(thisCard.id, thisCard.toRAW()).then(() => this._onDataChangeMain(this._movies, thisCard));
     }
   }
 

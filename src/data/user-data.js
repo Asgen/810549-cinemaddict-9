@@ -21,7 +21,7 @@ export default class UserData {
     this._getRank(this.watchedFilms.length);
   }
 
-  watchedGenres() {
+  getWatchedGenres() {
     return this.watchedFilms
     .reduce((prev, curr) => {
       return [...prev, ...curr.genre];
@@ -33,8 +33,8 @@ export default class UserData {
   }
 
   _setTopGenre() {
-    const genres = [...Object.keys(this.watchedGenres())];
-    const topIndex = [...Object.values(this.watchedGenres())].indexOf(Math.max(...Object.values(this.watchedGenres())));
+    const genres = [...Object.keys(this.getWatchedGenres())];
+    const topIndex = [...Object.values(this.getWatchedGenres())].indexOf(Math.max(...Object.values(this.getWatchedGenres())));
     this.topGenre = genres[topIndex];
   }
 
@@ -45,7 +45,7 @@ export default class UserData {
     x.favorites = this.favorites.length;
     x.totalDuration = this.totalDuration;
     x.topGenre = this.topGenre;
-    x.watchedGenres = this.watchedGenres();
+    x.getWatchedGenres = this.getWatchedGenres();
 
     return x;
   }

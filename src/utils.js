@@ -16,9 +16,9 @@ const FilterBy = {
   ALL: `all`
 };
 
-const createElement = (tempalete) => {
+const createElement = (template) => {
   const element = document.createElement(`div`);
-  element.innerHTML = tempalete;
+  element.innerHTML = template;
   return element.firstChild;
 };
 

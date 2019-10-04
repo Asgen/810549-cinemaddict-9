@@ -4,54 +4,47 @@ import Profile from '../src/components/profile.js';
 import PageController from '../src/controllers/page-controller.js';
 import SearchController from '../src/controllers/search-controller.js';
 import UserData from '../src/data/user-data.js';
-
 import API from '../src/api.js';
 
 const AUTHORIZATION = `Basic dXNlckBwYXNzd29yZAo`;
 const END_POINT = `https://htmlacademy-es-9.appspot.com/cinemaddict`;
+
 const api = new API({endPoint: END_POINT, authorization: AUTHORIZATION});
+const header = document.querySelector(`.header`);
+const main = document.querySelector(`.main`);
+const searchBar = new SearchBar();
+const userData = new UserData();
+const profile = new Profile(userData.watchedFilms.length);
 
 const refreshProfile = (watchedFilms) => {
   profile.update(watchedFilms);
-
   unrender(profile.getElement());
   profile.removeElement();
+
   render(header, profile.getElement(), Position.BEFOREEND);
 };
 
-const onDatachenge = (showedMovies) => {
-/*  refreshProfile(watchedFilms);
-  pageController.update(movies, showedMovies);*/
-
+const onDataChange = (showedMovies) => {
   api.getMovies().then((movies) => {
-    console.log(movies);
     userData.update(movies);
     refreshProfile(userData.watchedFilms.length);
     pageController.update(movies, showedMovies);
   });
 };
 
-const userData = new UserData();
-const header = document.querySelector(`.header`);
-const main = document.querySelector(`.main`);
-const searchBar = new SearchBar();
+const pageController = new PageController(main, onDataChange, api);
+const searchController = new SearchController(main, searchBar.getElement(), onDataChange, api);
 render(header, searchBar.getElement(), Position.BEFOREEND);
-
-const pageController = new PageController(main, onDatachenge, api);
-const searchController = new SearchController(main, searchBar.getElement(), onDatachenge, api);
+render(header, profile.getElement(), Position.BEFOREEND);
 searchController.hide();
 
 api.getMovies().then((movies) => {
-
   userData.update(movies);
   refreshProfile(userData.watchedFilms.length);
   pageController.update(movies);
   pageController.show(movies);
   searchController.setCards(movies);
 });
-
-const profile = new Profile(userData.watchedFilms.length);
-render(header, profile.getElement(), Position.BEFOREEND);
 
 searchBar.getElement().querySelector(`.search__reset`)
   .addEventListener(`click`, () => {

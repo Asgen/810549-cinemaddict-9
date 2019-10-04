@@ -48,7 +48,9 @@ export default class Detail extends AbstractComponent {
   }
 
   removePersonalRating() {
-    this.getElement().querySelector(`.film-details__user-rating`).innerText = ``;
+    if (this.getElement().querySelector(`.film-details__user-rating`)) {
+      this.getElement().querySelector(`.film-details__user-rating`).innerText = ``;
+    }
   }
 
   updateCommentsCount(count) {
