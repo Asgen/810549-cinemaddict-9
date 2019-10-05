@@ -1,5 +1,5 @@
 import moment from 'moment';
-import AbstractComponent from '../components/AbstractComponent.js';
+import AbstractComponent from '../components/abstract-component.js';
 
 export default class Detail extends AbstractComponent {
   constructor({id, title, alternativeTitle, description, director, writers, actors, duration, country, poster, date, genre, totalRating, ageRating, userDetails}, comments) {

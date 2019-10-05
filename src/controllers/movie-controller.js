@@ -1,4 +1,4 @@
-import {render, createElement, unrender, Position} from '../utils.js';
+import {render, createElement, unrender, Position, KeyCode} from '../utils.js';
 import {BageColor} from '../data/colors.js';
 import Card from '../components/card.js';
 import Detail from '../components/detail.js';
@@ -18,6 +18,50 @@ export default class MovieController {
     this.init();
   }
 
+  init() {
+
+    const onCardClick = () => {
+
+      if (document.body.contains(document.querySelector(`.film-details`))) {
+        return;
+      }
+
+      this._api.getComments(this._data.id).then((comments) => this._renderPopup(comments));
+    };
+
+    // Обработка нажатий на контроль фильма
+    for (const control of this._card.getElement().querySelectorAll(`.film-card__controls-item`)) {
+      control.addEventListener(`click`, (evt) => {
+        evt.preventDefault();
+        evt.target.classList.toggle(`film-card__controls-item--active`);
+        switch (evt.target.dataset.controlType) {
+          case (`watchlist`):
+            this._onDataChange(this._data, `watchlist`);
+            break;
+          case (`watched`):
+            this._onDataChange(this._data, `watched`);
+            break;
+          case (`favorite`):
+            this._onDataChange(this._data, `favorite`);
+            break;
+        }
+      });
+    }
+
+    this._card.getElement().querySelector(`.film-card__title`).addEventListener(`click`, onCardClick);
+    this._card.getElement().querySelector(`.film-card__comments`).addEventListener(`click`, onCardClick);
+    this._card.getElement().querySelector(`.film-card__poster`).addEventListener(`click`, onCardClick);
+
+    render(this._container, this._card.getElement(), Position.BEFOREEND);
+  }
+
+  setDefaultView() {
+    if (document.body.contains(this._detail.getElement())) {
+      unrender(this._detail.getElement());
+      this._detail.removeElement();
+    }
+  }
+
   _renderPopup(comments) {
 
     const body = document.querySelector(`body`);
@@ -31,33 +75,33 @@ export default class MovieController {
     const ratingLabels = this._detail.getElement().querySelectorAll(`.film-details__user-rating-label`);
 
     const blockRatingInputs = () => {
-      for (let input of ratingInputs) {
+      for (const input of ratingInputs) {
         input.disabled = true;
       }
     };
 
     const unMarkRatingLabels = () => {
-      for (let label of ratingLabels) {
+      for (const label of ratingLabels) {
         label.style.backgroundColor = BageColor.DEFAULT;
       }
     };
 
     const unblockRatingInputs = () => {
-      for (let input of ratingInputs) {
+      for (const input of ratingInputs) {
         input.disabled = false;
       }
     };
 
     const blockCommetnInput = () => {
       commentInput.disabled = true;
-      for (let emoji of emojiList) {
+      for (const emoji of emojiList) {
         emoji.disabled = true;
       }
     };
 
     const unblockCommentInput = () => {
       commentInput.disabled = false;
-      for (let emoji of emojiList) {
+      for (const emoji of emojiList) {
         emoji.disabled = false;
       }
     };
@@ -77,7 +121,7 @@ export default class MovieController {
         });
 
     // Установка рейтинга фильма
-    for (let input of ratingInputs) {
+    for (const input of ratingInputs) {
       input.addEventListener(`change`, (evt) => {
         const selectedLabel = this._detail.getElement().querySelector(`label[for="${evt.target.id}"]`);
         evt.preventDefault();
@@ -123,7 +167,7 @@ export default class MovieController {
     .addEventListener(`click`, onResetRating);
 
     // Обработка нажатий на контроль фильма в детальном просмотре
-    for (let control of this._detail.getElement().querySelectorAll(`.film-details__control-input`)) {
+    for (const control of this._detail.getElement().querySelectorAll(`.film-details__control-input`)) {
       control.addEventListener(`change`, (evt) => {
         evt.preventDefault();
         let controlType = ``;
@@ -181,7 +225,7 @@ export default class MovieController {
     // Добавление комментария
     commentInput.addEventListener(`keydown`, (evt) => {
 
-      if (evt.key === `Enter` && evt.ctrlKey && commentInput.value && emojiContainer.querySelector(`img`)) {
+      if (evt.keyCode === KeyCode.ENTER && evt.ctrlKey && commentInput.value && emojiContainer.querySelector(`img`)) {
         blockCommetnInput();
         let newComment = {
           'comment': commentInput.value.replace(/[^а-яёa-z0-9\s\.]/gmi, ` `),
@@ -214,7 +258,7 @@ export default class MovieController {
     });
 
     // Выбор emoji
-    for (let emoji of emojiList) {
+    for (const emoji of emojiList) {
       emoji.addEventListener(`change`, (evt) => {
         emojiContainer.innerHTML = ``;
 
@@ -239,52 +283,8 @@ export default class MovieController {
   }
 
   _onEscKeyDown(evt) {
-    if (evt.key === `Escape` || evt.key === `Esc`) {
+    if (evt.keyCode === KeyCode.ESC) {
       this.setDefaultView();
-    }
-  }
-
-  init() {
-
-    const onCardClick = () => {
-
-      if (document.body.contains(document.querySelector(`.film-details`))) {
-        return;
-      }
-
-      this._api.getComments(this._data.id).then((comments) => this._renderPopup(comments));
-    };
-
-    // Обработка нажатий на контроль фильма
-    for (let control of this._card.getElement().querySelectorAll(`.film-card__controls-item`)) {
-      control.addEventListener(`click`, (evt) => {
-        evt.preventDefault();
-        evt.target.classList.toggle(`film-card__controls-item--active`);
-        switch (evt.target.dataset.controlType) {
-          case (`watchlist`):
-            this._onDataChange(this._data, `watchlist`);
-            break;
-          case (`watched`):
-            this._onDataChange(this._data, `watched`);
-            break;
-          case (`favorite`):
-            this._onDataChange(this._data, `favorite`);
-            break;
-        }
-      });
-    }
-
-    this._card.getElement().querySelector(`.film-card__title`).addEventListener(`click`, onCardClick);
-    this._card.getElement().querySelector(`.film-card__comments`).addEventListener(`click`, onCardClick);
-    this._card.getElement().querySelector(`.film-card__poster`).addEventListener(`click`, onCardClick);
-
-    render(this._container, this._card.getElement(), Position.BEFOREEND);
-  }
-
-  setDefaultView() {
-    if (document.body.contains(this._detail.getElement())) {
-      unrender(this._detail.getElement());
-      this._detail.removeElement();
     }
   }
 }

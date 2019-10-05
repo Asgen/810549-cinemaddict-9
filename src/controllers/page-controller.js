@@ -42,6 +42,33 @@ export default class PageController {
     this._init();
   }
 
+  show() {
+    this._isHidden = false;
+    this._films.getElement().classList.remove(`visually-hidden`);
+    this._sort.getElement().classList.remove(`visually-hidden`);
+    this._navigation.getElement().classList.remove(`visually-hidden`);
+  }
+
+  update(movies, showedMovies) {
+
+    if (movies.length < 1) {
+      this._filmsListContainer.getElement().innerHTML = `There are no movies in our database`;
+      return;
+    }
+
+    this._userData.update(movies);
+    this._updateNavigation();
+    this._setCards(movies, showedMovies);
+  }
+
+  hide() {
+    this._isHidden = true;
+    this._films.getElement().classList.add(`visually-hidden`);
+    this._sort.getElement().classList.add(`visually-hidden`);
+    this._navigation.getElement().classList.add(`visually-hidden`);
+    this._statisticController.hide();
+  }
+
   _init() {
     render(this._container, this._navigation.getElement(), Position.BEFOREEND);
     render(this._container, this._sort.getElement(), Position.BEFOREEND);
@@ -92,33 +119,6 @@ export default class PageController {
     this._filteredMovies = this._filterBy ? this._filterMovies(this._movies, this._filterBy) : null;
     this._showedMovies = showedMovies ? showedMovies : CARDS_IN_ROW;
     this._renderPage();
-  }
-
-  show() {
-    this._isHidden = false;
-    this._films.getElement().classList.remove(`visually-hidden`);
-    this._sort.getElement().classList.remove(`visually-hidden`);
-    this._navigation.getElement().classList.remove(`visually-hidden`);
-  }
-
-  update(movies, showedMovies) {
-
-    if (movies.length < 1) {
-      this._filmsListContainer.getElement().innerHTML = `There are no movies in our database`;
-      return;
-    }
-
-    this._userData.update(movies);
-    this._updateNavigation();
-    this._setCards(movies, showedMovies);
-  }
-
-  hide() {
-    this._isHidden = true;
-    this._films.getElement().classList.add(`visually-hidden`);
-    this._sort.getElement().classList.add(`visually-hidden`);
-    this._navigation.getElement().classList.add(`visually-hidden`);
-    this._statisticController.hide();
   }
 
   _onSortClick(evt) {
@@ -238,6 +238,7 @@ export default class PageController {
 
     this._api.getMovies().then((movies) => {
       this.update(movies, this._showedMovies);
+      this._onDataChangeMain(this._showedMovies);
     });
   }
 

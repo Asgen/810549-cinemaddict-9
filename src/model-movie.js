@@ -1,35 +1,35 @@
 export default class ModelMovie {
-  constructor(data) {
-    this.id = data[`id`];
-    this.title = data[`film_info`][`title`];
-    this.description = data[`film_info`][`description`];
-    this.alternativeTitle = data[`film_info`][`alternative_title`];
-    this.poster = data[`film_info`][`poster`];
-    this.director = data[`film_info`][`director`];
-    this.writers = new Set(data[`film_info`][`writers`]);
-    this.ageRating = data[`film_info`][`age_rating`];
-    this.totalRating = data[`film_info`][`total_rating`];
-    this.actors = new Set(data[`film_info`][`actors`]);
-    this.date = data[`film_info`][`release`][`date`];
-    this.country = data[`film_info`][`release`][`release_country`];
-    this.duration = data[`film_info`][`runtime`];
-    this.genre = new Set(data[`film_info`][`genre`]);
+  constructor(movie) {
+    this.id = movie[`id`];
+    this.title = movie[`film_info`][`title`];
+    this.description = movie[`film_info`][`description`];
+    this.alternativeTitle = movie[`film_info`][`alternative_title`];
+    this.poster = movie[`film_info`][`poster`];
+    this.director = movie[`film_info`][`director`];
+    this.writers = new Set(movie[`film_info`][`writers`]);
+    this.ageRating = movie[`film_info`][`age_rating`];
+    this.totalRating = movie[`film_info`][`total_rating`];
+    this.actors = new Set(movie[`film_info`][`actors`]);
+    this.date = movie[`film_info`][`release`][`date`];
+    this.country = movie[`film_info`][`release`][`release_country`];
+    this.duration = movie[`film_info`][`runtime`];
+    this.genre = new Set(movie[`film_info`][`genre`]);
     this.userDetails = {
-      personalRating: data[`user_details`][`personal_rating`],
-      isFavorite: data[`user_details`][`favorite`],
-      isWatched: data[`user_details`][`already_watched`],
-      inWatchList: data[`user_details`][`watchlist`],
-      watchingDate: data[`user_details`][`watching_date`],
+      personalRating: movie[`user_details`][`personal_rating`],
+      isFavorite: movie[`user_details`][`favorite`],
+      isWatched: movie[`user_details`][`already_watched`],
+      inWatchList: movie[`user_details`][`watchlist`],
+      watchingDate: movie[`user_details`][`watching_date`],
     };
-    this.comments = data[`comments`];
+    this.comments = movie[`comments`];
   }
 
-  static parseCard(data) {
-    return new ModelMovie(data);
+  static parseCard(movie) {
+    return new ModelMovie(movie);
   }
 
-  static parseCards(data) {
-    return data.map(ModelMovie.parseCard);
+  static parseCards(movies) {
+    return movies.map(ModelMovie.parseCard);
   }
 
   toRAW() {

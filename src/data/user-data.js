@@ -1,3 +1,5 @@
+import {getUserRank} from '../functions.js';
+
 export default class UserData {
   constructor() {
     this.watchList = [];
@@ -32,12 +34,6 @@ export default class UserData {
     }, {});
   }
 
-  _setTopGenre() {
-    const genres = [...Object.keys(this.getWatchedGenres())];
-    const topIndex = [...Object.values(this.getWatchedGenres())].indexOf(Math.max(...Object.values(this.getWatchedGenres())));
-    this.topGenre = genres[topIndex];
-  }
-
   countActivity() {
     const x = {};
     x.watchList = this.watchList.length;
@@ -50,21 +46,14 @@ export default class UserData {
     return x;
   }
 
+  _setTopGenre() {
+    const genres = [...Object.keys(this.getWatchedGenres())];
+    const topIndex = [...Object.values(this.getWatchedGenres())].indexOf(Math.max(...Object.values(this.getWatchedGenres())));
+    this.topGenre = genres[topIndex];
+  }
+
   _getRank(watchedFilmsLength) {
-    switch (true) {
-      case (watchedFilmsLength < 1):
-        this.rank = ``;
-        break;
-      case (watchedFilmsLength > 0 && watchedFilmsLength < 11):
-        this.rank = `Novice`;
-        break;
-      case (watchedFilmsLength > 10 && watchedFilmsLength < 21):
-        this.rank = `Fan`;
-        break;
-      case (watchedFilmsLength > 20):
-        this.rank = `Movie Buff`;
-        break;
-    }
+    this.rank = getUserRank(watchedFilmsLength);
     return this.rank;
   }
 }

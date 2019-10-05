@@ -9,9 +9,7 @@ class AbstractComponent {
   }
 
   getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
+    this._element = this._element ? this._element : createElement(this.getTemplate());
 
     return this._element;
   }

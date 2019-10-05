@@ -3,6 +3,11 @@ const Position = {
   BEFOREEND: `beforeend`
 };
 
+const KeyCode = {
+  ESC: 27,
+  ENTER: 13
+};
+
 const SortBy = {
   DATE: `date`,
   RATING: `rating`,
@@ -40,4 +45,4 @@ const unrender = (element) => {
   }
 };
 
-export {createElement, render, unrender, Position, SortBy, FilterBy};
+export {createElement, render, unrender, Position, SortBy, FilterBy, KeyCode};

@@ -1,5 +1,6 @@
 import {render, unrender, Position} from '../utils.js';
 import {renderStatisticChart} from '../chart-options.js';
+import {StatisticFilter} from '../data/dictionaries.js';
 import moment from 'moment';
 
 import Statistic from '../components/statistic.js';
@@ -29,6 +30,20 @@ export default class StatisticController {
     this._statisticFilters.getElement().addEventListener(`change`, (evt) => this._onFilterChange(evt));
   }
 
+  show(cards, rank) {
+    this._cards = cards;
+    this._rank = rank;
+    this._userData.update(cards);
+    this._render();
+    this._statistic.getElement().classList.remove(`visually-hidden`);
+    this._statisticFilters.getElement().querySelector(`#statistic-all-time`).checked = true;
+  }
+
+  hide() {
+    this._statistic.getElement().classList.add(`visually-hidden`);
+
+  }
+
   _render() {
     unrender(this._statistic.getElement().querySelector(`.statistic__rank`));
     unrender(this._statistic.getElement().querySelector(`.statistic__text-list`));
@@ -47,44 +62,30 @@ export default class StatisticController {
   _onFilterChange(evt) {
 
     switch (evt.target.value) {
-      case `today`:
+      case StatisticFilter.TODAY:
         const filterToday = this._cards.filter((card) => moment().isSame(card.userDetails.watchingDate, `day`));
         this._userData.update(filterToday);
         this._render();
         break;
-      case `week`:
+      case StatisticFilter.WEEK:
         const filterWeek = this._cards.filter((card) => moment().isSame(card.userDetails.watchingDate, `week`));
         this._userData.update(filterWeek);
         this._render();
         break;
-      case `month`:
+      case StatisticFilter.MONTH:
         const filterMonth = this._cards.filter((card) => moment().isSame(card.userDetails.watchingDate, `month`));
         this._userData.update(filterMonth);
         this._render();
         break;
-      case `year`:
+      case StatisticFilter.YEAR:
         const filterYear = this._cards.filter((card) => moment().isSame(card.userDetails.watchingDate, `year`));
         this._userData.update(filterYear);
         this._render();
         break;
-      case `all-time`:
+      case StatisticFilter.ALL:
         this._userData.update(this._cards);
         this._render();
         break;
     }
-  }
-
-  show(cards, rank) {
-    this._cards = cards;
-    this._rank = rank;
-    this._userData.update(cards);
-    this._render();
-    this._statistic.getElement().classList.remove(`visually-hidden`);
-    this._statisticFilters.getElement().querySelector(`#statistic-all-time`).checked = true;
-  }
-
-  hide() {
-    this._statistic.getElement().classList.add(`visually-hidden`);
-
   }
 }

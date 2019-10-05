@@ -1,5 +1,7 @@
 import moment from 'moment';
-import AbstractComponent from '../components/AbstractComponent.js';
+import AbstractComponent from '../components/abstract-component.js';
+
+const MAX_DESCRIPTION_LENGTH = 140;
 
 class Card extends AbstractComponent {
   constructor({title, description, duration, poster, date, genre, totalRating, userDetails, comments}) {
@@ -27,7 +29,7 @@ class Card extends AbstractComponent {
       <span class="film-card__genre">${Array.from(this._genre).join(`, `)}</span>
     </p>
     <img src="${this._poster}" alt="" class="film-card__poster">
-    <p class="film-card__description">${this._description.length > 140 ? this._description.slice(0, 140) + `...` : `` }</p>
+    <p class="film-card__description">${this._description.length > MAX_DESCRIPTION_LENGTH ? this._description.slice(0, MAX_DESCRIPTION_LENGTH) + `...` : `` }</p>
     <a class="film-card__comments">${this._comments.length} comments</a>
     <form class="film-card__controls">
       <button data-control-type="watchlist" class="film-card__controls-item button film-card__controls-item--add-to-watchlist ${this._inWatchList ? `film-card__controls-item--active` : ``}">Add to watchlist</button>

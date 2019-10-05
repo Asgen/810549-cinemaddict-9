@@ -1,4 +1,4 @@
-import AbstractComponent from '../components/AbstractComponent.js';
+import AbstractComponent from '../components/abstract-component.js';
 
 export default class Search extends AbstractComponent {
   constructor(count) {

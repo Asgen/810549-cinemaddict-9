@@ -27,11 +27,10 @@ const refreshProfile = (watchedFilms) => {
   render(header, profile.getElement(), Position.BEFOREEND);
 };
 
-const onDataChange = (showedMovies) => {
+const onDataChange = () => {
   api.getMovies().then((movies) => {
     userData.update(movies);
     refreshProfile(userData.watchedFilms.length);
-    pageController.update(movies, showedMovies);
   });
 };
 

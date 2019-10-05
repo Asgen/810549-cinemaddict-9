@@ -7,12 +7,18 @@ const Method = {
   DELETE: `DELETE`
 };
 
+const ServerCode = {
+  SUCCESS: 200,
+  REDIRECTION: 300,
+  ERROR: 400
+};
+
 const checkStatus = (response) => {
-  if (response.status >= 200 && response.status < 300) {
+  if (response.status >= ServerCode.SUCCESS && response.status < ServerCode.REDIRECTION) {
     return response;
-  } else {
-    throw new Error(`${response.status}: ${response.statusText}`);
   }
+
+  throw new Error(`${response.status}: ${response.statusText}`);
 };
 
 const toJSON = (response) => {
@@ -46,11 +52,11 @@ export default class API {
       .then(toJSON);
   }
 
-  updateMovie(id, data) {
+  updateMovie(id, movie) {
     return this._load({
       url: `movies/${id}`,
       method: Method.PUT,
-      body: JSON.stringify(data),
+      body: JSON.stringify(movie),
       headers: new Headers({'Content-Type': `application/json`})
     })
       .then(toJSON)
