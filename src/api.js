@@ -42,7 +42,8 @@ export default class API {
       method: Method.POST,
       body: JSON.stringify(comment),
       headers: new Headers({'Content-Type': `application/json`})
-    });
+    })
+      .then(toJSON);
   }
 
   updateMovie(id, data) {
@@ -69,8 +70,7 @@ export default class API {
     return fetch(`${this._endPoint}/${url}`, {method, body, headers})
       .then(checkStatus)
       .catch((err) => {
-        console.error(`fetch error: ${err}`);
-        throw err;
+        throw new Error(`fetch error: ${err}`);
       });
   }
 }

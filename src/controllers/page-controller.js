@@ -1,5 +1,5 @@
 import UserData from '../data/user-data.js';
-import {render, unrender, Position, SortBy} from '../utils.js';
+import {render, unrender, Position, SortBy, FilterBy} from '../utils.js';
 import Navigation from '../components/navigation.js';
 import Films from '../components/films.js';
 import ShowMoreBtn from '../components/show-more-button.js';
@@ -17,7 +17,7 @@ export default class PageController {
   constructor(container, onDataChange, api) {
     this._api = api;
     this._onDataChangeMain = onDataChange;
-    this._cardsArr = [];
+    this._movies = [];
     this._container = container;
     this._userData = new UserData();
     this._navigation = new Navigation();
@@ -29,10 +29,10 @@ export default class PageController {
     this._unrenderedCards = 0;
     this._filteredMovies = null;
     this._sortMoviesBy = SortBy.DEFAULT;
-
-    this._showedMovies = CARDS_IN_ROW;
+    this._filterBy = FilterBy.ALL;
     this._isHidden = false;
 
+    this._showedMovies = CARDS_IN_ROW;
     this._subscriptions = [];
 
     this._extraMoviesController = new ExtraMoviesController(this._films.getElement(), this._onExtraDataChange.bind(this), this._api);
@@ -59,7 +59,7 @@ export default class PageController {
     unrender(this._showMoreBtn.getElement());
     this._showMoreBtn.removeElement();
 
-    let movies = this._filteredMovies ? this._filteredMovies : this._cardsArr;
+    let movies = this._filteredMovies ? this._filteredMovies : this._movies;
     movies = this._sortMoviesList(movies, this._sortMoviesBy);
 
     if (this._showedMovies < movies.length) {
@@ -67,14 +67,14 @@ export default class PageController {
     }
 
     this._movitListConrtroller.setCards(movies.slice(0, this._showedMovies));
-    this._extraMoviesController.render(this._cardsArr);
+    this._extraMoviesController.render(this._movies);
 
     this._showMoreBtn.getElement()
       .addEventListener(`click`, () => this._onLoadMoreButtonClick());
   }
 
   _onLoadMoreButtonClick() {
-    let movies = this._filteredMovies ? this._filteredMovies : this._cardsArr;
+    let movies = this._filteredMovies ? this._filteredMovies : this._movies;
     movies = this._sortMoviesList(movies, this._sortMoviesBy);
 
     this._movitListConrtroller.addTasks(movies.slice(this._showedMovies, this._showedMovies + CARDS_IN_ROW));
@@ -88,9 +88,10 @@ export default class PageController {
   }
 
   _setCards(cards, showedMovies) {
-    this._cardsArr = this._filteredMovies ? this._cardsArr : cards;
+    this._movies = cards;
+    this._filteredMovies = this._filterBy ? this._filterMovies(this._movies, this._filterBy) : null;
     this._showedMovies = showedMovies ? showedMovies : CARDS_IN_ROW;
-    this._renderPage(cards);
+    this._renderPage();
   }
 
   show() {
@@ -101,6 +102,12 @@ export default class PageController {
   }
 
   update(movies, showedMovies) {
+
+    if (movies.length < 1) {
+      this._filmsListContainer.getElement().innerHTML = `There are no movies in our database`;
+      return;
+    }
+
     this._userData.update(movies);
     this._updateNavigation();
     this._setCards(movies, showedMovies);
@@ -136,23 +143,23 @@ export default class PageController {
         break;
     }
 
-    this._setCards(this._filteredMovies ? this._filteredMovies : this._cardsArr);
+    this._setCards(this._filteredMovies ? this._filteredMovies : this._movies);
   }
 
   _sortMoviesList(movies, mode) {
-    let sortedArr = movies.slice();
+    let sortedMovies = movies.slice();
     switch (mode) {
       case SortBy.DATE:
-        sortedArr.sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
+        sortedMovies.sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
         break;
       case SortBy.RATING:
-        sortedArr.sort((a, b) => b.totalRating - a.totalRating);
+        sortedMovies.sort((a, b) => b.totalRating - a.totalRating);
         break;
       case SortBy.DEFAULT:
-        sortedArr.sort((a, b) => parseInt(a.id, 10) - parseInt(b.id, 10));
+        sortedMovies.sort((a, b) => a.id - b.id);
         break;
     }
-    return sortedArr;
+    return sortedMovies;
   }
 
   _onNavigationClick(evt) {
@@ -166,26 +173,8 @@ export default class PageController {
     switch (evt.target.dataset.navType) {
       case (`all`):
         this.show();
-        this._filteredMovies = null;
-        this._setCards(this._cardsArr.slice());
-        this._statisticController.hide();
-        break;
-      case (`watchlist`):
-        this.show();
-        this._filteredMovies = this._cardsArr.filter((it) => it.userDetails.inWatchList === true);
-        this._setCards(this._filteredMovies);
-        this._statisticController.hide();
-        break;
-      case (`history`):
-        this.show();
-        this._filteredMovies = this._cardsArr.filter((it) => it.userDetails.isWatched === true);
-        this._setCards(this._filteredMovies);
-        this._statisticController.hide();
-        break;
-      case (`favorites`):
-        this.show();
-        this._filteredMovies = this._cardsArr.filter((it) => it.userDetails.isFavorite === true);
-        this._setCards(this._filteredMovies);
+        this._filterBy = null;
+        this._setCards(this._movies.slice());
         this._statisticController.hide();
         break;
       case (`stats`):
@@ -193,7 +182,33 @@ export default class PageController {
         this._navigation.getElement().classList.remove(`visually-hidden`);
         this._statisticController.show(this._userData.watchedFilms, this._userData.rank);
         break;
+      default:
+        this.show();
+        this._filterBy = evt.target.dataset.navType;
+        this._setCards(this._movies.slice());
+        this._statisticController.hide();
+        break;
     }
+  }
+
+  _filterMovies(allMovies, filter) {
+    let filteredMovies = [];
+
+    switch (filter) {
+      case (FilterBy.WATCHLIST):
+        filteredMovies = allMovies.filter((it) => it.userDetails.inWatchList === true);
+        break;
+      case (FilterBy.HISTORY):
+        filteredMovies = allMovies.filter((it) => it.userDetails.isWatched === true);
+        break;
+      case (FilterBy.FAVORITES):
+        filteredMovies = allMovies.filter((it) => it.userDetails.isFavorite === true);
+        break;
+      case (FilterBy.ALL):
+        filteredMovies = null;
+        break;
+    }
+    return filteredMovies;
   }
 
   _updateNavigation() {
@@ -220,6 +235,7 @@ export default class PageController {
   }
 
   _onDataChange() {
+
     this._api.getMovies().then((movies) => {
       this.update(movies, this._showedMovies);
     });

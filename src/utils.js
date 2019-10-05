@@ -9,9 +9,16 @@ const SortBy = {
   DEFAULT: `default`
 };
 
-const createElement = (tempalete) => {
+const FilterBy = {
+  WATCHLIST: `watchlist`,
+  HISTORY: `history`,
+  FAVORITES: `favorites`,
+  ALL: `all`
+};
+
+const createElement = (template) => {
   const element = document.createElement(`div`);
-  element.innerHTML = tempalete;
+  element.innerHTML = template;
   return element.firstChild;
 };
 
@@ -33,4 +40,4 @@ const unrender = (element) => {
   }
 };
 
-export {createElement, render, unrender, Position, SortBy};
+export {createElement, render, unrender, Position, SortBy, FilterBy};

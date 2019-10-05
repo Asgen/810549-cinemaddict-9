@@ -1,7 +1,7 @@
 /* eslint-disable */
 import Chart from 'chart.js';
 
-const renderStatisticChart = (container, labelsArr, dataArr) => {
+const renderStatisticChart = (container, names, records) => {
 
   const chartOptions = {
     tooltips: {
@@ -74,9 +74,9 @@ const renderStatisticChart = (container, labelsArr, dataArr) => {
   const daysChart = new Chart(container, {
     type: `horizontalBar`,
     data: {
-      labels: labelsArr,
+      labels: names,
       datasets: [{
-        data: dataArr,
+        data: records,
         backgroundColor: `#ffe800`,
       }]
     },

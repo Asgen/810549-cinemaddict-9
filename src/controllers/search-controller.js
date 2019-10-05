@@ -13,8 +13,8 @@ const CARDS_IN_ROW = 5;
 export default class SearchController {
   constructor(container, input, onDataChange, api) {
     this._api = api;
-    this._cardsArr = [];
-    this._searchArr = [];
+    this._movies = [];
+    this._foundMovies = [];
     this._container = container;
     this._input = input;
     this._querry = ``;
@@ -48,24 +48,24 @@ export default class SearchController {
   }
 
   setCards(cards) {
-    this._cardsArr = cards;
+    this._movies = cards;
   }
 
   show(querry) {
     this._showedMovies = CARDS_IN_ROW;
-    this._querry = querry.replace(/[^а-яёa-z0-9\s\.]/gmi, ` `);
+    this._querry = querry.replace(/[^а-яёa-z0-9\s\.]/gmi, ``);
     let re = new RegExp(this._querry, `gim`);
 
-    this._searchArr = this._cardsArr.filter((it) => it.title.match(re) !== null);
+    this._foundMovies = this._movies.filter((it) => it.title.match(re) !== null);
 
     if (this._container.contains(this._searchResult.getElement())) {
       unrender(this._searchResult.getElement());
     }
-    this._searchResult.setCount(this._searchArr.length);
+    this._searchResult.setCount(this._foundMovies.length);
     render(this._container, this._searchResult.getElement(), Position.AFTERBEGIN);
 
     this._filmsListContainer.getElement().innerHTML = ``;
-    this._setCards(this._searchArr);
+    this._setCards(this._foundMovies);
 
     this._films.getElement().classList.remove(`visually-hidden`);
     this._searchResult.getElement().classList.remove(`visually-hidden`);

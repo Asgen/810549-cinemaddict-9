@@ -22,6 +22,7 @@ export default class Detail extends AbstractComponent {
     this._isWatched = userDetails.isWatched;
     this._inWatchList = userDetails.inWatchList;
     this._isFavorite = userDetails.isFavorite;
+    this._personalRate = userDetails.isWatched ? userDetails.personalRating : null;
 
     this._onControlClick();
   }
@@ -35,11 +36,25 @@ export default class Detail extends AbstractComponent {
               <p class="film-details__comment-text">${comment.comment}</p>
               <p class="film-details__comment-info">
                 <span class="film-details__comment-author">${comment.author}</span>
-                <span class="film-details__comment-day">${new Date(comment.commentDate).toDateString()}</span>
+                <span class="film-details__comment-day">${new Date(comment.date).toDateString()}</span>
                 <button class="film-details__comment-delete">Delete</button>
               </p>
             </div>
           </li>`;
+  }
+
+  updatePersonalRating(rating) {
+    this.getElement().querySelector(`.film-details__user-rating`).innerText = `Your rate ${rating}`;
+  }
+
+  removePersonalRating() {
+    if (this.getElement().querySelector(`.film-details__user-rating`)) {
+      this.getElement().querySelector(`.film-details__user-rating`).innerText = ``;
+    }
+  }
+
+  updateCommentsCount(count) {
+    this.getElement().querySelector(`.film-details__comments-count`).innerText = count;
   }
 
   _onControlClick() {
@@ -75,6 +90,7 @@ export default class Detail extends AbstractComponent {
 
             <div class="film-details__rating">
               <p class="film-details__total-rating">${this._rate}</p>
+              ${this._personalRate ? `<p class="film-details__user-rating">Your rate ${this._personalRate}</p>` : ``}
             </div>
           </div>
 
@@ -147,32 +163,11 @@ export default class Detail extends AbstractComponent {
             <p class="film-details__user-rating-feelings">How you feel it?</p>
 
             <div class="film-details__user-rating-score">
-              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="1" id="rating-1">
-              <label class="film-details__user-rating-label" for="rating-1">1</label>
 
-              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="2" id="rating-2">
-              <label class="film-details__user-rating-label" for="rating-2">2</label>
-
-              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="3" id="rating-3">
-              <label class="film-details__user-rating-label" for="rating-3">3</label>
-
-              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="4" id="rating-4">
-              <label class="film-details__user-rating-label" for="rating-4">4</label>
-
-              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="5" id="rating-5">
-              <label class="film-details__user-rating-label" for="rating-5">5</label>
-
-              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="6" id="rating-6">
-              <label class="film-details__user-rating-label" for="rating-6">6</label>
-
-              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="7" id="rating-7">
-              <label class="film-details__user-rating-label" for="rating-7">7</label>
-
-              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="8" id="rating-8">
-              <label class="film-details__user-rating-label" for="rating-8">8</label>
-
-              <input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="9" id="rating-9" checked="">
-              <label class="film-details__user-rating-label" for="rating-9">9</label>
+            ${Array.from(Array(9))
+                  .map((it, index) => `<input type="radio" name="score" class="film-details__user-rating-input visually-hidden" value="${index + 1}" id="rating-${index + 1}" ${this._personalRate === index + 1 ? `checked` : ``}>
+              <label class="film-details__user-rating-label" for="rating-${index + 1}">${index + 1}</label>`)
+                  .join(``)}
 
             </div>
           </section>

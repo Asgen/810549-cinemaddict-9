@@ -23,7 +23,7 @@ class Card extends AbstractComponent {
     <p class="film-card__rating">${this._rate}</p>
     <p class="film-card__info">
       <span class="film-card__year">${moment(this._date).format(`YYYY`)}</span>
-      <span class="film-card__duration">${this._duration}</span>
+      <span class="film-card__duration">${Math.floor(this._duration / 60)}h ${this._duration % 60}m</span>
       <span class="film-card__genre">${Array.from(this._genre).join(`, `)}</span>
     </p>
     <img src="${this._poster}" alt="" class="film-card__poster">

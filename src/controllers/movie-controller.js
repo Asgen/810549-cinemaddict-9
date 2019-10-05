@@ -1,10 +1,11 @@
 import {render, createElement, unrender, Position} from '../utils.js';
+import {BageColor} from '../data/colors.js';
 import Card from '../components/card.js';
 import Detail from '../components/detail.js';
 
 
 export default class MovieController {
-  constructor(container, data, onDataChange, onChangeView, api) {
+  constructor({container, data, onDataChange, onChangeView, api}) {
     this._container = container;
     this._data = data;
     this._card = new Card(data);
@@ -21,6 +22,46 @@ export default class MovieController {
 
     const body = document.querySelector(`body`);
     this._detail = new Detail(this._data, comments);
+    const userRateElement = this._detail.getElement().querySelector(`.film-details__user-rating`);
+
+    const ratingInputs = this._detail.getElement().querySelectorAll(`.film-details__user-rating-input`);
+    const emojiContainer = this._detail.getElement().querySelector(`.film-details__add-emoji-label`);
+    const emojiList = this._detail.getElement().querySelectorAll(`.film-details__emoji-item`);
+    const commentInput = this._detail.getElement().querySelector(`.film-details__comment-input`);
+    const ratingLabels = this._detail.getElement().querySelectorAll(`.film-details__user-rating-label`);
+
+    const blockRatingInputs = () => {
+      for (let input of ratingInputs) {
+        input.disabled = true;
+      }
+    };
+
+    const unMarkRatingLabels = () => {
+      for (let label of ratingLabels) {
+        label.style.backgroundColor = BageColor.DEFAULT;
+      }
+    };
+
+    const unblockRatingInputs = () => {
+      for (let input of ratingInputs) {
+        input.disabled = false;
+      }
+    };
+
+    const blockCommetnInput = () => {
+      commentInput.disabled = true;
+      for (let emoji of emojiList) {
+        emoji.disabled = true;
+      }
+    };
+
+    const unblockCommentInput = () => {
+      commentInput.disabled = false;
+      for (let emoji of emojiList) {
+        emoji.disabled = false;
+      }
+    };
+
     render(body, this._detail.getElement(), Position.BEFOREEND);
 
     document.addEventListener(`keydown`, (e) => this._onEscKeyDown(e));
@@ -35,21 +76,75 @@ export default class MovieController {
           document.removeEventListener(`keydown`, this._onEscKeyDown);
         });
 
+    // Установка рейтинга фильма
+    for (let input of ratingInputs) {
+      input.addEventListener(`change`, (evt) => {
+        const selectedLabel = this._detail.getElement().querySelector(`label[for="${evt.target.id}"]`);
+        evt.preventDefault();
+        blockRatingInputs();
+        unMarkRatingLabels();
+        this._data.userDetails.personalRating = parseInt(evt.target.value, 10);
+        this._api.updateMovie(this._data.id, this._data.toRAW())
+        .then(() => {
+          this._onDataChange(this._data, null);
+          unblockRatingInputs();
+          selectedLabel.style.backgroundColor = BageColor.SELECTED;
+        })
+        .catch(() => {
+          selectedLabel.style.backgroundColor = BageColor.ERROR;
+          selectedLabel.style.animation = `shake 0.6s`;
+          unblockRatingInputs();
+        });
+
+        if (userRateElement) {
+          this._detail.updatePersonalRating(evt.target.value);
+        }
+      });
+    }
+
+    const onResetRating = (event) => {
+      event.preventDefault();
+      if (this._data.userDetails.personalRating) {
+        this._data.userDetails.personalRating = 0;
+        this._api.updateMovie(this._data.id, this._data.toRAW())
+          .then(() => this._onDataChange(this._data, null));
+
+        this._detail.getElement().querySelector(`input[name="score"]:checked`).checked = false;
+
+        if (userRateElement) {
+          userRateElement.remove();
+        }
+        unMarkRatingLabels();
+      }
+    };
+
+    // Сброс рейтинга
+    this._detail.getElement().querySelector(`.film-details__watched-reset`)
+    .addEventListener(`click`, onResetRating);
+
     // Обработка нажатий на контроль фильма в детальном просмотре
     for (let control of this._detail.getElement().querySelectorAll(`.film-details__control-input`)) {
       control.addEventListener(`change`, (evt) => {
         evt.preventDefault();
+        let controlType = ``;
         switch (evt.target.id) {
           case (`watchlist`):
-            this._onDataChange(this._data, `watchlist`);
+            controlType = `watchlist`;
             break;
           case (`watched`):
-            this._onDataChange(this._data, `watched`);
+            controlType = `watched`;
             break;
           case (`favorite`):
-            this._onDataChange(this._data, `favorite`);
+            controlType = `favorite`;
             break;
         }
+
+        // Обнуление рейтинга при удалении из истории просмотра
+        if (!this._detail.getElement().querySelector(`input[id="watched"]:checked`)) {
+          onResetRating(evt);
+        }
+
+        this._onDataChange(this._data, controlType);
       });
     }
 
@@ -61,43 +156,59 @@ export default class MovieController {
           return;
         }
 
-        let commentId = 0;
+        let commentDOM = null;
+        evt.target.disabled = true;
 
         this._detail.getElement().querySelectorAll(`.film-details__comment`)
           .forEach((it) => {
             if ((it.contains(evt.target))) {
-              it.remove();
-              commentId = parseInt(it.id, 10);
+              commentDOM = it;
             }
           });
 
-        this._api.deleteComment(commentId).then(() => this._onDataChange(this._data, null));
+        this._api.deleteComment(commentDOM.id)
+          .then(() => {
+            commentDOM.remove();
+            this._detail.updateCommentsCount(this._detail.getElement().querySelectorAll(`.film-details__comment`).length);
+            this._onDataChange(this._data, null);
+          })
+          .catch(() => {
+            commentDOM.style.animation = `shake ${600 / 1000}s`;
+            evt.target.disabled = false;
+          });
       });
 
     // Добавление комментария
-    const emojiContainer = this._detail.getElement().querySelector(`.film-details__add-emoji-label`);
-    const emojiList = this._detail.getElement().querySelectorAll(`.film-details__emoji-item`);
-    const commentInput = this._detail.getElement().querySelector(`.film-details__comment-input`);
-
     commentInput.addEventListener(`keydown`, (evt) => {
 
       if (evt.key === `Enter` && evt.ctrlKey && commentInput.value && emojiContainer.querySelector(`img`)) {
-
-        const newComment = {
+        blockCommetnInput();
+        let newComment = {
           'comment': commentInput.value.replace(/[^а-яёa-z0-9\s\.]/gmi, ` `),
           'emotion': this._detail.getElement().querySelector(`input[name="comment-emoji"]:checked`).value,
           'date': new Date().toISOString(),
         };
 
-        const commentDOM = createElement(this._detail.createComment(newComment));
-        render(this._detail.getElement().querySelector(`.film-details__comments-list`), commentDOM, Position.BEFOREEND);
+        this._api.createComment(this._data.id, newComment)
+        .then((response) => {
+          newComment = response.comments[response.comments.length - 1];
+          const commentDOM = createElement(this._detail.createComment(newComment));
+          render(this._detail.getElement().querySelector(`.film-details__comments-list`), commentDOM, Position.BEFOREEND);
+          this._detail.updateCommentsCount(this._detail.getElement().querySelectorAll(`.film-details__comment`).length);
+          this._onDataChange(this._data, null);
+          unblockCommentInput();
 
-        this._api.createComment(this._data.id, newComment).then(() => this._onDataChange(this._data, null));
-
-        let checkedInput = this._detail.getElement().querySelector(`INPUT[name="comment-emoji"]:checked`);
-        emojiContainer.innerHTML = ``;
-        commentInput.value = ``;
-        checkedInput.checked = false;
+          let checkedInput = this._detail.getElement().querySelector(`INPUT[name="comment-emoji"]:checked`);
+          emojiContainer.innerHTML = ``;
+          commentInput.value = ``;
+          commentInput.style.border = `none`;
+          checkedInput.checked = false;
+        })
+        .catch(() => {
+          commentInput.style.animation = `shake ${600 / 1000}s`;
+          commentInput.style.border = `2px solid red`;
+          unblockCommentInput();
+        });
       }
 
     });
