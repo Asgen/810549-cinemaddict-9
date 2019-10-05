@@ -53,7 +53,7 @@ export default class SearchController {
 
   show(querry) {
     this._showedMovies = CARDS_IN_ROW;
-    this._querry = querry.replace(/[^а-яёa-z0-9\s\.]/gmi, ` `);
+    this._querry = querry.replace(/[^а-яёa-z0-9\s\.]/gmi, ``);
     let re = new RegExp(this._querry, `gim`);
 
     this._foundMovies = this._movies.filter((it) => it.title.match(re) !== null);

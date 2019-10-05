@@ -1,4 +1,4 @@
-import {render, unrender, Position, SortBy} from '../utils.js';
+import {render, Position} from '../utils.js';
 
 import FilmsListExtra from '../components/films-list-extra.js';
 import FilmsListExtraTitle from '../components/films-list-extra-title.js';

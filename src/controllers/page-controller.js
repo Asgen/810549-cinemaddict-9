@@ -102,6 +102,12 @@ export default class PageController {
   }
 
   update(movies, showedMovies) {
+
+    if (movies.length < 1) {
+      this._filmsListContainer.getElement().innerHTML = `There are no movies in our database`;
+      return;
+    }
+
     this._userData.update(movies);
     this._updateNavigation();
     this._setCards(movies, showedMovies);
@@ -228,7 +234,7 @@ export default class PageController {
     this._navigation.getElement().addEventListener(`click`, (evt) => this._onNavigationClick(evt));
   }
 
-  _onDataChange(newMovies, newCard) {
+  _onDataChange() {
 
     this._api.getMovies().then((movies) => {
       this.update(movies, this._showedMovies);

@@ -1,4 +1,5 @@
 import {render, createElement, unrender, Position} from '../utils.js';
+import {BageColor} from '../data/colors.js';
 import Card from '../components/card.js';
 import Detail from '../components/detail.js';
 
@@ -37,7 +38,7 @@ export default class MovieController {
 
     const unMarkRatingLabels = () => {
       for (let label of ratingLabels) {
-        label.style.backgroundColor = `#d8d8d8`;
+        label.style.backgroundColor = BageColor.DEFAULT;
       }
     };
 
@@ -87,11 +88,11 @@ export default class MovieController {
         .then(() => {
           this._onDataChange(this._data, null);
           unblockRatingInputs();
-          selectedLabel.style.backgroundColor = `#ffe800`;
+          selectedLabel.style.backgroundColor = BageColor.SELECTED;
         })
         .catch(() => {
-          selectedLabel.style.backgroundColor = `red`;
-          selectedLabel.style.animation = `shake ${600 / 1000}s`;
+          selectedLabel.style.backgroundColor = BageColor.ERROR;
+          selectedLabel.style.animation = `shake 0.6s`;
           unblockRatingInputs();
         });
 

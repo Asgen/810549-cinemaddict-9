@@ -41,7 +41,7 @@ export default class StatisticController {
     if (this._chart) {
       this._chart.destroy();
     }
-    this._chart = renderStatisticChart(daysCtx, [...Object.keys(this._userData.watchedGenres())], [...Object.values(this._userData.watchedGenres())]);
+    this._chart = renderStatisticChart(daysCtx, [...Object.keys(this._userData.getWatchedGenres())], [...Object.values(this._userData.getWatchedGenres())]);
   }
 
   _onFilterChange(evt) {
