@@ -1,4 +1,3 @@
-/* eslint-disable */
 import Chart from 'chart.js';
 
 const renderStatisticChart = (container, names, records) => {
@@ -46,6 +45,7 @@ const renderStatisticChart = (container, names, records) => {
     animation: {
       onComplete() {
         const chartInstance = this.chart;
+        const that = this;
         const ctx = chartInstance.ctx;
         ctx.textAlign = `right`;
         ctx.font = `16px Open Sans`;
@@ -60,8 +60,8 @@ const renderStatisticChart = (container, names, records) => {
             } else {
               ctx.fillText(data, bar._model.x - 25, bar._model.y + 4);
             }
-          }), this);
-        }), this);
+          }), that);
+        }), that);
       }
     },
     plugins: {
